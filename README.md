@@ -82,4 +82,4 @@ This plugin supports Spigot [1.17.x](https://www.spigotmc.org/wiki/buildtools/#1
 
 ### Download
 
-You may download the plugin jar [here](https://www.mediafire.com/file/df74njcev7l9he2/Residence.jar/file)
+You may download the plugin [here](https://www.mediafire.com/file/df74njcev7l9he2/Residence.jar/file)
