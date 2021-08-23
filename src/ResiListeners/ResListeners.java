@@ -57,24 +57,6 @@ public class ResListeners implements Listener{
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
-	/*
-	 * Glowing shulkers at selected points to show area * DONE
-	 * PPL CAN PLACE WATER/LAVA IN CLAIM *** DONE
-	 * SIGNS *** DONE
-	 * ITEM FRAMES *** DONE
-	 * ARMOR STANDS *** DONE
-	 * Tnt ??? Copy of area + increase size by 10 in each direction and disallow placing ** DONE
-	 * 
-	 * Per player rules on residence (Allow specific player to do something) **** DONE
-	 * 
-	 * 
-	 * 
-	 * 
-	 * Fix player fall damage  DONE
-	 * Fix resident rule menu DONE
-	 * Per player perm for entering (residents) DONE
-	 */
-	
 	// Variables
 	public static List<Material> applicableCrops = Arrays.asList(Material.WHEAT, Material.POTATOES, Material.CARROTS, Material.BEETROOTS);
 	public static HashMap<String, Boolean> playerInResidence = new HashMap<String, Boolean>();
@@ -88,20 +70,8 @@ public class ResListeners implements Listener{
 	public static HashMap<String, Residence> promptedUserResidence = new HashMap<>();
 	public static HashMap<String, Boolean> userInAreaSelection = new HashMap<>();
 	public static HashMap<String, Residence> userInAreaSelectionResidence = new HashMap<>();
-//	public static HashMap<String, Boolean> userHidingPoints = new HashMap<String, Boolean>();
 	public static HashMap<String, Boolean> userLaunched = new HashMap<>();
 	public static HashMap<Residence, Boolean> residenceDenyDamage = new HashMap<>();
-
-	
-	
-	/*
-	 * Block placing
-	 * Block breaking
-	 * Interacting with blocks
-	 * Interacting with entities
-	 * Entity damage
-	 * Vehicle destroy
-	 */
 	
 	@SuppressWarnings("deprecation")
 	// Denying block placing in residence
@@ -111,36 +81,20 @@ public class ResListeners implements Listener{
 		Block block = event.getBlock();
 		if(block.getType() == Material.TNT) return;
 		Location loc = block.getLocation();
-		//Location loc2 = loc.clone().subtract(0, 1, 0);
 		Residence res = Residence.getResidence(loc);
-		//Residence res2 = Residence.getResidence(loc2);
-		if(res == null) return;//res2 == null) return;
+		if(res == null) return;
 		Player owner = Bukkit.getPlayer(res.getOwner());
 		OfflinePlayer offOwner = null;
-		//Player owner2 = Bukkit.getPlayer(res2.getOwner());
-//		String uuid = null;
-		//String uuid2 = null;
-		if(owner == null) {// || owner2 == null) {
+		if(owner == null) {
 			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//			User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//			uuid = temp.getUniqueId().toString();
-//			if(owner2 == null) {
-//				uuid2 = Bukkit.getOfflinePlayer(res2.getOwner()).getUniqueId().toString();
-//			}
 		}
 		if(Main.protectOnlyWhileOffline == true) {
 			if(owner != null) {
 				return;
 			}
 		}
-//		else {
-//			uuid = owner.getUniqueId().toString();
-////			uuid2 = owner2.getUniqueId().toString();
-//		}
 		boolean value = res.getAllowBlockPlace();
-//		value = Main.getResidenceFile().getConfig().getBoolean("PlayerResidences."+uuid+".allowBlockPlacing");
-//		value2 = Main.getResidenceFile().getConfig().getBoolean("PlayerResidences."+uuid2+".allowBlockPlacing");
-		if(value == true) { //|| value2 == true) {
+		if(value == true) {
 			return;
 		}
 		if(value == false) {
@@ -276,23 +230,15 @@ public class ResListeners implements Listener{
 		if(res == null) return;
 		Player owner = Bukkit.getPlayer(res.getOwner());
 		OfflinePlayer offOwner = null;
-//		String uuid = null;
-//		String uuid2 = null;
 		if(owner == null) {
 			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//			User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//			uuid = temp.getUniqueId().toString();
 		}
 		if(Main.protectOnlyWhileOffline == true) {
 			if(owner != null) {
 				return;
 			}
 		}
-//		else {
-//			uuid = owner.getUniqueId().toString();
-//		}
 		boolean value = res.getAllowTNTPlacing();
-//		value = Main.getResidenceFile().getConfig().getBoolean("PlayerResidences."+uuid+".allowTNTPlacing");
 		if(value == true) {
 			return;
 		}
@@ -479,22 +425,15 @@ public class ResListeners implements Listener{
 		if(res == null) return;
 		Player owner = Bukkit.getPlayer(res.getOwner());
 		OfflinePlayer offOwner = null;
-//		String uuid = null;
 		if(owner == null) {
 			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//			User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//			uuid = temp.getUniqueId().toString();
 		}
 		if(Main.protectOnlyWhileOffline == true) {
 			if(owner != null) {
 				return;
 			}
 		}
-//		else {
-//			uuid = owner.getUniqueId().toString();
-//		}
 		boolean value = res.getAllowBlockBreak();
-//		value = Main.getResidenceFile().getConfig().getBoolean("PlayerResidences."+uuid+".allowBlockBreaking");
 		if(value == true) {
 			return;
 		}
@@ -611,7 +550,6 @@ public class ResListeners implements Listener{
 			playerWasInResidence.put(player.getName(), "null");
 			promptedUser.put(player.getName(), false);
 			promptedUserResidence.put(player.getName(), null);
-//			userHidingPoints.put(player.getName(), true);
 			userLaunched.put(player.getName(), false);
 			Methods.setDefaultPerms(player);
 			return;
@@ -624,13 +562,11 @@ public class ResListeners implements Listener{
 					Player p = onlinePlayers.get(i);
 					Methods.removeResidentPerms(p);
 				}
-//				Residence.save(player.getUniqueId(), res);
 				playerInResidence.put(player.getName(), false);
 				playerWasIn.put(player.getName(), "null");
 				playerWasInResidence.put(player.getName(), "null");
 				promptedUser.put(player.getName(), false);
 				promptedUserResidence.put(player.getName(), null);
-//				userHidingPoints.put(player.getName(), true);
 				userLaunched.put(player.getName(), false);
 				Methods.setDefaultPerms(player);
 				return;
@@ -1057,11 +993,8 @@ public class ResListeners implements Listener{
 		if(res == null) return;
 		Player owner = Bukkit.getPlayer(res.getOwner());
 		OfflinePlayer offOwner = null;
-//		String uuid = null;
 		if(owner == null) {
 			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//			User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//			uuid = temp.getUniqueId().toString();
 		}
 		if(Main.protectOnlyWhileOffline == true) {
 			if(owner != null) {
@@ -1070,24 +1003,6 @@ public class ResListeners implements Listener{
 		}
 		boolean value = res.getAllowBlockInteraction();
 		if(value == true) {
-//			if(player.getName().equalsIgnoreCase(Bukkit.getOfflinePlayer(UUID.fromString(uuid)).getName()) == false) {
-//				if(action.equals(Action.PHYSICAL)) {
-//					if(block.getType() == Material.FARMLAND) {
-//						event.setCancelled(true);
-//						return;
-//					}
-//					if(block.getType().name().contains("PRESSURE")) {
-//						event.setCancelled(true);
-//						return;
-//					}
-//				}
-//				if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-//					if(physicalBlocks.contains(block.getType())) {
-//						event.setCancelled(true);
-//						return;
-//					}
-//				}
-//			}
 			return;
 		}
 		if(value == false) {
@@ -1765,11 +1680,8 @@ public class ResListeners implements Listener{
 		if(res == null) return;
 		Player owner = Bukkit.getPlayer(res.getOwner());
 		OfflinePlayer offOwner = null;
-//		String uuid = null;
 		if(owner == null) {
 			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//			User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//			uuid = temp.getUniqueId().toString();
 		}
 		if(Main.protectOnlyWhileOffline == true && owner != null) {
 			return;
@@ -1890,11 +1802,8 @@ public class ResListeners implements Listener{
 		if(res == null) return;
 		Player owner = Bukkit.getPlayer(res.getOwner());
 		OfflinePlayer offOwner = null;
-//		String uuid = null;
 		if(owner == null) {
 			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//			User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//			uuid = temp.getUniqueId().toString();
 		}
 		if(Main.protectOnlyWhileOffline == true && owner != null) {
 			return;
@@ -2103,11 +2012,8 @@ public class ResListeners implements Listener{
 			if(res == null) return;
 			Player owner = Bukkit.getPlayer(res.getOwner());
 			OfflinePlayer offOwner = null;
-//			String uuid = null;
 			if(owner == null) {
 				offOwner = Bukkit.getOfflinePlayer(res.getOwner());
-//				User temp = Methods.getUserFromOfflinePlayer(offOwner.getUniqueId());
-//				uuid = temp.getUniqueId().toString();
 			}
 			if(Main.protectOnlyWhileOffline == true && owner != null) {
 				return;
@@ -2316,7 +2222,6 @@ public class ResListeners implements Listener{
 				int index = Residence.removeResidenceFromList(player.getUniqueId(), playerRes);
 				playerRes.setArea(newArea);
 				Residence.saveResidenceData(player.getUniqueId(), playerRes, true, index);
-//				playerRes.saveToConfig(player, playerRes);
 				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&aYour new residence area has been set"));
 				userInAreaSelection.put(player.getName(), false);
 				Commands.block1.remove(player);

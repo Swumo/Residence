@@ -63,6 +63,12 @@ public class Methods {
 	
 	
 	@SuppressWarnings("deprecation")
+	/**
+	 * Teleport player to a home
+	 * @param owner - Owner of the residence
+	 * @param resName - Name of the residence
+	 * @param toTp - Player to teleport
+	 */
 	public static void teleportToHome(String owner, String resName, Player toTp) {
 		UUID id = Bukkit.getOfflinePlayer(owner).getUniqueId();
 		Residence res = Residence.getResidence(id, resName);
@@ -85,6 +91,11 @@ public class Methods {
 		return;
 	}
 	
+	/**
+	 * Teleport player to their home
+	 * @param player - Player
+	 * @param resName - Residence name
+	 */
 	public static void teleportToHome(Player player, String resName) {
 		Residence res = Residence.getResidence(player, resName);
 		if(res == null) {
@@ -115,12 +126,16 @@ public class Methods {
 	 * 
 	 */
 	
-
+	/**
+	 * Save player home
+	 * @param player - Player
+	 * @param loc - Location
+	 * @param res - Residence
+	 */
 	public static void saveHome(Player player, Location loc, Residence res) {
 		res.setCenter(loc);
 		res.setYaw(loc.getYaw());
 		res.setPitch(loc.getPitch());
-//		Residence.save(player.getUniqueId(), res);
 	}
 	
 	
@@ -130,7 +145,10 @@ public class Methods {
 	 * 
 	 */
 	
-	
+	/**
+	 * Remove LuckPerm permission nodes, except for Meta ones, which have the Particle Colour, the default area size and the max amount of residences
+	 * @param player - Player
+	 */
 	public static void removePermissionsExceptMeta(Player player) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(player.getName());
@@ -160,9 +178,14 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Add resident permissions to a player
+	 * @param player - Player to add permissions to
+	 * @param res - Residence
+	 */
 	public static void setResidentPerms(Player player, Residence res) {
 		LuckPerms api = Main.getLP();
-		for(String perm : Commands.ruleList) {
+		for(String perm : Residence.allRules) {
 			PermissionNode node = PermissionNode.builder(res.getName()+"."+perm).build();
 			if(perm.equalsIgnoreCase("allowEntering")) {
 				node = node.toBuilder().value(true).build();
@@ -195,7 +218,7 @@ public class Methods {
 	 */
 	
 	/**
-	 * Remove resident perm
+	 * Remove resident permissions
 	 * @param player - Player to remove
 	 */
 	public static void removeResidentPerms(Player player) {
@@ -217,7 +240,7 @@ public class Methods {
 	}
 	
 	/**
-	 * Remove resident perms
+	 * Remove resident permissions
 	 * @param player - Name of the player to remove
 	 * @param res - Residence
 	 */
@@ -242,6 +265,11 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Get the max amount of claimable blocks for a player
+	 * @param player - Player
+	 * @return - Integer
+	 */
 	public static int getPlayerDefaultAreaSize(Player player) {
 		int area = 0;
 		LuckPerms api = Main.getLP();
@@ -264,7 +292,11 @@ public class Methods {
 	 * 
 	 */
 	
-	
+	/**
+	 * Set the max amount of claimable blocks for a player
+	 * @param player - Player
+	 * @param amount - Integer
+	 */
 	public static void setPlayerDefaultAreaSize(Player player, int amount) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(player.getName());
@@ -289,6 +321,11 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Get the max amount of residences a player can have
+	 * @param player - Player
+	 * @return - Integer
+	 */
 	public static int getPlayerMaxResidenceCount(Player player) {
 		int count = 0;
 		LuckPerms api = Main.getLP();
@@ -311,7 +348,11 @@ public class Methods {
 	 * 
 	 */
 	
-	
+	/**
+	 * Set the max amount of residences a player can have
+	 * @param player - Player
+	 * @param amount - Integer
+	 */
 	public static void setPlayerMaxResidenceCount(Player player, int amount) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(player.getName());
@@ -337,6 +378,12 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Update the particle menu, used for selecting a preferred particle colour
+	 * @param player - Player
+	 * @param colour - String
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void ParticleMenuUpdateColour(Player player, String colour) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(player.getName());
@@ -358,43 +405,6 @@ public class Methods {
 		return;
 	}
 	
-	/*
-	 * 
-	 * UPDATING RESIDENT PERMISSIONS
-	 * 
-	 */
-	
-//	public static void EditMenuUpdateRule(Player owner, Player editing, String rule) {
-//		LuckPerms api = Main.getLP();
-//		User user = api.getUserManager().getUser(editing.getName());
-//		List<Node> nodes = (List<Node>) user.getNodes();
-//		Node n = null;
-//		boolean value = false;
-//		for(int i = 0; i < nodes.size(); i++) {
-//			Node node = nodes.get(i);
-//			if(node.getKey().contains(rule)) {
-//				n = node;
-//				value = node.getValue();
-//				break;
-//			}
-//		}
-//		user.data().remove(n);
-//		if(value == false) {
-//			PermissionNode node = PermissionNode.builder(rule).build();
-//			node = node.toBuilder().value(true).build();
-//			user.data().add(node);
-//			api.getUserManager().saveUser(user);
-//		}
-//		if(value == true) {
-//			PermissionNode node = PermissionNode.builder(rule).build();
-//			node = node.toBuilder().value(false).build();
-//			user.data().add(node);
-//			api.getUserManager().saveUser(user);
-//		}
-//		ResidencePlayerEditMenu.updateInventory(owner, editing);
-//		return;
-//	}
-	
 	
 	/*
 	 * 
@@ -402,6 +412,12 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Get the residence rule value
+	 * @param owner - Player
+	 * @param rule - Rule
+	 * @return Boolean
+	 */
 	public static boolean GetRuleValue(Player owner, String rule) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(owner.getName());
@@ -417,6 +433,12 @@ public class Methods {
 		return value;
 	}
 	
+	/**
+	 * Get the residence rule value
+	 * @param owner - Name of owner
+	 * @param rule - Name of the rule
+	 * @return Boolean
+	 */
 	public static boolean GetRuleValue(String owner, String rule) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(owner);
@@ -439,7 +461,13 @@ public class Methods {
 	 * 
 	 */
 	
-	
+	/**
+	 * Update Rule menu when toggling residence rules
+	 * @param player - Owner
+	 * @param rule - Name of the rule
+	 * @param res - Residence
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	@SuppressWarnings("deprecation")
 	public static void RuleMenuUpdateRule(Player player, String rule, Residence res) {
 		switch(rule) {
@@ -572,6 +600,13 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Update Rules in General Rules menu
+	 * @param player - Player
+	 * @param rule - Name of the rule
+	 * @param res - Residence
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	@SuppressWarnings("deprecation")
 	public static void GenRuleMenuUpdateRule(Player player, String rule, Residence res) {
 		switch(rule) {
@@ -613,6 +648,13 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Get a location from config values
+	 * @param player - Player
+	 * @param values - String gotten from the config
+	 * @return Location or null
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static Location TeleportMenuGetLocationFromValues(Player player, String values) {
 		if(values != null) {
 			String[] data = values.split(",");
@@ -625,6 +667,13 @@ public class Methods {
 		return null;
 	}
 	
+	/**
+	 * Get a location from config values
+	 * @param player - Offline player
+	 * @param values - String gotten from the config
+	 * @return Location or null
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static Location TeleportMenuGetLocationFromValues(OfflinePlayer player, String values) {
 		if(values != null) {
 			String[] data = values.split(",");
@@ -643,7 +692,7 @@ public class Methods {
 	 * RUNNABLE FOR LISTENING FOR AREA SELECTION TO DISPLAY PARTICLES
 	 * 
 	 */
-	
+
 	public static void listenForAreaSelection() {
 		new BukkitRunnable() {
 
@@ -666,7 +715,6 @@ public class Methods {
 						}
 						Color color = ListenersStringToColour(value);
 						if(Commands.block1.containsKey(p) && Commands.block2.containsKey(p)) {
-//							boolean isHiding = ResListeners.userHidingPoints.get(p.getName());
 							Location b1Loc = Commands.block1.get(p).getLocation();
 							Location b2Loc = Commands.block2.get(p).getLocation();
 							List<Vector> edges = Utils.edges(b1Loc.toVector(), b2Loc.toVector());
@@ -674,16 +722,6 @@ public class Methods {
 								Location toSpawn = edge.toLocation(p.getWorld());
 								Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1);
 								p.spawnParticle(Particle.REDSTONE, toSpawn, 1, dustOptions);	
-//								if(isHiding == true) {
-//									Location toSpawn = edge.toLocation(p.getWorld());
-//									Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1);
-//									p.spawnParticle(Particle.REDSTONE, toSpawn, 1, dustOptions);	
-//								}
-//								if(isHiding == false) {
-//									Location toSpawn = edge.toLocation(p.getWorld());
-//									Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1);
-//									toSpawn.getWorld().spawnParticle(Particle.REDSTONE, toSpawn, 1, dustOptions);
-//								}
 							}
 						}
 					}	
@@ -694,7 +732,13 @@ public class Methods {
 	}
 	
 	
-	
+	/**
+	 * Task for displaying an area of a residence, chosen by the player
+	 * @param player - Player
+	 * @param edges - List of vectors
+	 * @param res - Residence
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void displayResidenceArea(Player player, List<Vector> edges, Residence res) {
 		BukkitTask task = new BukkitRunnable() {
 			@Override
@@ -811,7 +855,12 @@ public class Methods {
 	 * 
 	 */
 	
-	
+	/**
+	 * Method for removing the glowing block, when selecting an area with the wand
+	 * @param player - Player
+	 * @param blockNumber - Integer (1-2)
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void ListenersRemoveGlowingBlock(Player player, int blockNumber) {
 		World world = player.getWorld();
 		List<Entity> entities = world.getEntities();
@@ -832,6 +881,12 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Get a color object from a string
+	 * @param colour - Name of the color
+	 * @return Color
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static Color ListenersStringToColour(String colour) {
 		if(colour == null) return null;
 		switch (colour) {
@@ -866,10 +921,14 @@ public class Methods {
 	 * 
 	 */
 	
-	
+	/**
+	 * Spawn in a glowing shulker when selecting an area with the wand
+	 * @param player - Player
+	 * @param loc - Location
+	 * @param blockNumber - Integer (1-2)
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void ListenersSpawnGlowingBlock(Player player, Location loc, int blockNumber) {
-//		boolean isHiding = ResListeners.userHidingPoints.get(player.getName());
-//		EntityHider entityHider = Main.getHider();
 		List<Player> otherPlayers = new ArrayList<Player>(Bukkit.getOnlinePlayers());
 		otherPlayers.remove(player);
 		if(blockNumber == 1) {
@@ -882,11 +941,6 @@ public class Methods {
 			sh.setPersistent(true);
 			sh.setFallDistance(0);
 			sh.setCustomName(player.getName()+"Block1");
-//			if(isHiding == true) {
-//				for(Player p : otherPlayers) {
-//					entityHider.hideEntity(p, sh);
-//				}	
-//			}
 			new BukkitRunnable() {
 
 				@Override
@@ -914,11 +968,6 @@ public class Methods {
 			sh.setPersistent(true);
 			sh.setFallDistance(0);
 			sh.setCustomName(player.getName()+"Block2");
-//			if(isHiding == true) {
-//				for(Player p : otherPlayers) {
-//					entityHider.hideEntity(p, sh);
-//				}	
-//			}
 			new BukkitRunnable() {
 
 				@Override
@@ -945,6 +994,12 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Get the extended area of a residence, used for TNT checking
+	 * @param values - String of values
+	 * @return Cuboid object
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static Cuboid getPlayerExtendedResidenceArea(String values) {
 		if(values != null) {
 			Cuboid area = null;
@@ -971,6 +1026,12 @@ public class Methods {
 	 *
 	 */
 	
+	/**
+	 * Get player residence from a list of objects
+	 * @param values - Linked list of objects
+	 * @return Residence
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static Residence getPlayerResidenceFromValues(LinkedList<Object> values) {
 		if(values != null) {
 			// Needed variables
@@ -1054,52 +1115,17 @@ public class Methods {
 	
 	/*
 	 * 
-	 * GET PLAYER RESIDENCE FROM MASTERLIST
-	 * 
-	 */
-	
-	
-//	public static Residence getPlayerResidenceFromMasterList(Player player) {
-//		HashMap<String, String> masterList = Residence.getResidenceMap();
-//		for(String o : masterList.keySet()) {
-//			if(o.equals(player.getName())) {
-//				String values = masterList.get(o);
-//				Residence res = getPlayerResidenceFromValues(values);
-//				return res;
-//			}
-//		}
-//		return null;
-//	}
-//	
-//	@SuppressWarnings("deprecation")
-//	public static Residence getPlayerResidenceFromMasterList(UUID playerUUID) {
-//		HashMap<String, String> masterList = Residence.getResidenceMap();
-//		for(String o : masterList.keySet()) {
-//			Player player = Bukkit.getPlayer(o);
-//			UUID uuid = null;
-//			if(player == null) {
-//				uuid = Bukkit.getOfflinePlayer(o).getUniqueId();
-//			}
-//			else {
-//				uuid = player.getUniqueId();
-//			}
-//			if(uuid.equals(playerUUID)) {
-//				String values = masterList.get(o);
-//				Residence res = getPlayerResidenceFromValues(values);
-//				return res;
-//			}
-//		}
-//		return null;
-//	}
-	
-	
-	/*
-	 * 
 	 * EXPAND CUBOID AREA
 	 * 
 	 */
 	
-	
+	/**
+	 * Expand an area by a specified amount
+	 * @param area - Cuboid area
+	 * @param amount - Amount of blocks to expand
+	 * @return - Expanded Cuboid area
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static Cuboid expandArea(Cuboid area, int amount) {
 		if(area == null) return null;
 		area = area.expand(CuboidDirection.East, amount);
@@ -1118,6 +1144,12 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Launch a player back when they try to enter a Residence, which has "allowEntering" rule disabled
+	 * @param player - Player
+	 * @param dir - Direction to launch
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void teleportPlayerBack(Player player, String dir) {
 		if(dir == null) {
 			player.setVelocity(new Vector(1, 0, 0));
@@ -1169,6 +1201,11 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Set the default permissions for a player
+	 * @param player - Player
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void setDefaultPerms(Player player) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(player.getName());
@@ -1227,6 +1264,14 @@ public class Methods {
 	 * 
 	 */
 	
+	/**
+	 * Check if a resident can do something based on the specified rule
+	 * @param builder - Resident
+	 * @param rule - Name of the rule
+	 * @param res - Residence
+	 * @return Boolean
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static boolean checkIfResidentCan(Player builder, String rule, Residence res) {
 		boolean residentValue = false;
 		LuckPerms api = Main.getLP();
@@ -1242,6 +1287,15 @@ public class Methods {
 		return residentValue;
 	}
 	
+	/**
+	 * Check if a resident can do something based on the specified rule
+	 * @param builder - Resident
+	 * @param owner - OfflinePlayer owner
+	 * @param rule - Name of the rule
+	 * @param res - Residence
+	 * @return Boolean
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static boolean checkIfResidentCan(Player builder, OfflinePlayer owner, String rule, Residence res) {
 		boolean residentValue = false;
 		LuckPerms api = Main.getLP();
@@ -1260,6 +1314,15 @@ public class Methods {
 		return residentValue;
 	}
 	
+	/**
+	 * Check if a resident can do something based on the specified rule
+	 * @param builder - Resident
+	 * @param owner - Name of the owner
+	 * @param rule - Name of the rule
+	 * @param res - Residence
+	 * @return Boolean
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static boolean checkIfResidentCan(Player builder, String owner, String rule, Residence res) {
 		boolean residentValue = false;
 		LuckPerms api = Main.getLP();
@@ -1275,14 +1338,20 @@ public class Methods {
 		return residentValue;
 	}
 	
-	
+	/**
+	 * Update resident permissions when the owner changed the residence name
+	 * @param resident - UUID of the resident
+	 * @param oldName - Old name of the residence
+	 * @param newName - New name of the residence
+	 * @apiNote Should not be used on its own, as it could break some things!
+	 */
 	public static void updateResidentPermissions(UUID resident, String oldName, String newName) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(resident);
 		List<Node> nodes = (List<Node>) user.getNodes();
 		for(int i = 0; i < nodes.size(); i++) {
 			Node node = nodes.get(i);
-			if(node.getKey().contains(oldName + ".")) {// || node.getKey().contains(owner2.getName() + "Residence.allowBlockPlacing")) {
+			if(node.getKey().contains(oldName + ".")) {
 				boolean value = node.getValue();
 				String rule = node.getKey().replace(oldName + ".", "");
 				user.data().remove(node);

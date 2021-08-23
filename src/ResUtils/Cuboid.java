@@ -13,6 +13,12 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
+
+/**
+ * This class is a region/cuboid from one location to another. It can be used for blocks protection and things like WorldEdit.
+ * @author desht (Original code), KingFaris10 (Editor of code)
+ */
+
 public class Cuboid implements Iterable<Block>, Cloneable, ConfigurationSerializable {
     protected final String worldName;
     protected final int x1, y1, z1;

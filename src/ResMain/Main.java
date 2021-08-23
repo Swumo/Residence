@@ -27,7 +27,6 @@ import ResGUI.ResidenceRuleMenu;
 import ResGUI.ResidenceSettingsMenu;
 import ResGUI.ResidenceTeleportMenu;
 import ResMethods.Methods;
-import ResUtils.BlockSaving;
 import ResUtils.ConfigWrapper;
 import ResUtils.ResidenceConfig;
 import ResiListeners.Listeners;
@@ -171,7 +170,6 @@ public class Main extends JavaPlugin{
 						c.set("PlayerResidences."+player.toString(), null);
 						masterResidenceFile.saveConfig();
 					}
-					BlockSaving.removeEntry(player, resName);
 					break;
 				}
 			}
@@ -192,7 +190,6 @@ public class Main extends JavaPlugin{
 						c.set("PlayerResidences."+player.toString(), null);
 						masterResidenceFile.saveConfig();
 					}
-					BlockSaving.removeEntry(player, res.getName());
 					break;
 				}
 			}

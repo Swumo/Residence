@@ -645,6 +645,12 @@ public class Residence {
 		return res;
 	}
 	
+
+	/**
+	 * Save player residence
+	 * @param player - Player
+	 * @param r - Residence
+	 */
 	public static void save(UUID player, Residence r) {
 		LuckPerms api = Main.getLP();
 		boolean color = false;
@@ -714,6 +720,12 @@ public class Residence {
 		checkDuplicates(player);
 	}
 	
+	/**
+	 * Save player Residence at the specified index in the master list
+	 * @param player - Player
+	 * @param r - Residence
+	 * @param index - Index
+	 */
 	public static void save(UUID player, Residence r, int index) {
 		LuckPerms api = Main.getLP();
 		boolean color = false;
@@ -776,9 +788,11 @@ public class Residence {
 		}
 		checkDuplicates(player);
 	}
-	
+	/**
+	 * Check for any duplicate residences in the master list
+	 * @param player - Player
+	 */
 	private static void checkDuplicates(UUID player) {
-		// Check if there are any duplicates in masterlist
 		LinkedList<Residence> residences = MasterList.get(player);
 		LinkedList<Residence> newResidences = new LinkedList<>();
 		for(Residence res : residences) {
@@ -788,7 +802,12 @@ public class Residence {
 		}
 		MasterList.put(player, newResidences);
 	}
-	
+	/**
+	 * Remove the specified residence from the master list
+	 * @param player - Player
+	 * @param res - Residence
+	 * @return Index where the residence was found
+	 */
 	public static int removeResidenceFromList(UUID player, Residence res) {
 		int index = 0;
 		LinkedList<Residence> residences = MasterList.get(player);
@@ -812,7 +831,12 @@ public class Residence {
 	}
 	
 	
-	
+	/**
+	 * Save residence in the config
+	 * @param id - Player UUID
+	 * @param res - Residence
+	 * @param saveList - True/False to save the master list as well
+	 */
 	public static void saveResidenceData(UUID id, Residence res, boolean saveList) {
 		ConfigWrapper data = Main.getResidenceFile();
 		FileConfiguration c = data.getConfig();
@@ -827,6 +851,13 @@ public class Residence {
 		}
 	}
 	
+	/**
+	 * Save residence in the config
+	 * @param id - Player UUID
+	 * @param res - Residence
+	 * @param saveList - True/False to save the master list as well
+	 * @param index - Index where the residence is located in the master list
+	 */
 	public static void saveResidenceData(UUID id, Residence res, boolean saveList, int index) {
 		ConfigWrapper data = Main.getResidenceFile();
 		FileConfiguration c = data.getConfig();

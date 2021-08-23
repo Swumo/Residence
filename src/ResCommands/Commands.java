@@ -40,9 +40,7 @@ public class Commands implements TabExecutor{
 		plugin.getCommand(command).setExecutor(this);
 	}
 	
-	public static List<String> ruleList = Arrays.asList("allowBlockPlacing", "allowBlockBreaking", 
-			"allowBlockInteraction", "allowEntityInteraction", "allowDamageEntities", 
-			"allowVehicleDestroy", "allowTNTPlacing", "allowTeleport", "allowEntering");
+
 	public static HashMap<Player, Block> block1 = new HashMap<Player, Block>();
 	public static HashMap<Player, Block> block2 = new HashMap<Player, Block>();
 	public static HashMap<Player, Boolean> block1LeftClicked = new HashMap<Player, Boolean>();
@@ -104,7 +102,6 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal("&e/res | /res ? &7- &bDisplay this message"));
 			player.sendMessage(Utils.normal("&e/res menu &7- &bOpen Residence Menu"));
 			player.sendMessage(Utils.normal("&e/res wand <player> &7- &bGet/Give Residence Claim Wand &c[Admin Only]"));
-//			player.sendMessage(Utils.normal("&e/res deselect &7- &bDeselect currently selected positions"));
 			player.sendMessage(Utils.normal("&e/res create &7- &bCreate your Residence"));
 			player.sendMessage(Utils.normal("&e/res add <residence name> <player> &7- &bAdd <player> to your Residence"));
 			player.sendMessage(Utils.normal("&e/res remove <residence name> <player> &7- &bRemove <player> from your Residence"));
@@ -127,7 +124,6 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal("&e/res | /res ? &7- &bDisplay this message"));
 			player.sendMessage(Utils.normal("&e/res menu &7- &bOpen Residence Menu"));
 			player.sendMessage(Utils.normal("&e/res wand <player> &7- &bGet/Give Residence Claim Wand &c[Admin Only]"));
-//			player.sendMessage(Utils.normal("&e/res deselect &7- &bDeselect currently selected positions"));
 			player.sendMessage(Utils.normal("&e/res create &7- &bCreate your Residence"));
 			player.sendMessage(Utils.normal("&e/res add <residence name> <player> &7- &bAdd <player> to your Residence"));
 			player.sendMessage(Utils.normal("&e/res remove <residence name> <player> &7- &bRemove <player> from your Residence"));
@@ -329,7 +325,6 @@ public class Commands implements TabExecutor{
 			}
 			Location center = player.getLocation();
 			Methods.saveHome(player, center, res);
-//			Residence.save(player.getUniqueId(), res);
 			Residence.saveResidenceData(player.getUniqueId(), res, false);
 			player.sendMessage(Utils.normal(pluginPrefix +"&aResidence home set!"));
 			return true;
@@ -388,34 +383,8 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal(pluginPrefix +"&cThat Residence does not exist!"));
 			return false;
 		}
-//		
-//		
-//		// Deselect
-//		
-//		if(args[0].equalsIgnoreCase("deselect")) {
-//			if(!block1.containsKey(player) && !block2.containsKey(player)) {
-//				player.sendMessage(Utils.normal(pluginPrefix +"&cYou do not have any positions selected!"));
-//				return false;
-//			}
-//			if(block1.containsKey(player)) {
-//				block1.remove(player);	
-//			}
-//			if(block2.containsKey(player)) {
-//				block2.remove(player);	
-//			}
-//			if(Listeners.task1 != null) {
-//				Listeners.task1.cancel();
-//			}
-//			if(Listeners.task2 != null) {
-//				Listeners.task2.cancel();	
-//			}
-//			Methods.ListenersRemoveGlowingBlock(player, 1);
-//			Methods.ListenersRemoveGlowingBlock(player, 2);
-//			player.sendMessage(Utils.normal(pluginPrefix +"&aSelection removed!"));
-//			return true;
-//		}
-//		
-//		
+		
+		
 		// Add
 		
 		if(args[0].equalsIgnoreCase("add")) {
@@ -449,16 +418,15 @@ public class Commands implements TabExecutor{
 				return false;
 			}
 			res = Residence.addResident(player, playerToAdd, res);
-//			Residence.saveResidenceData(player.getUniqueId(), res);
 			Methods.setResidentPerms(playerToAdd, res);
 			player.sendMessage(Utils.normal(pluginPrefix+"&e"+name+" &ahas been added to your Residence!"));
 			playerToAdd.sendMessage(Utils.normal(pluginPrefix+"&eYou have been added to &6"+player.getName()+"'s &eResidence!"));
 			return true;
 		}
-//		
-//		
-//		// Remove
-//		
+
+		
+		// Remove
+		
 		if(args[0].equalsIgnoreCase("remove")) {
 			if(args.length < 2) {
 				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a player!"));
@@ -490,7 +458,6 @@ public class Commands implements TabExecutor{
 				return false;
 			}
 			res = Residence.removeResident(player, playerToRemove, res);
-//			Residence.saveResidenceData(player.getUniqueId(), res);
 			Methods.removeResidentPerms(playerToRemove.getName(), res);
 			player.sendMessage(Utils.normal(pluginPrefix+"&e"+name+" &ahas been removed to your Residence!"));
 			playerToRemove.sendMessage(Utils.normal(pluginPrefix+"&eYou have been removed from &6"+player.getName()+"'s &eResidence!"));
@@ -818,50 +785,6 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal(pluginPrefix+"&aYour maximum amount of Residences is &e"+amount+"&a!"));
 			return true;
 		}
-		
-		// Save residence blocks
-		if(args[0].equalsIgnoreCase("save")) {
-//			Residence res = Residence.getResidence(player.getLocation());
-//			if(res == null || res.isOwner(player) == false) {
-//				player.sendMessage(Utils.normal(pluginPrefix +"&cYou must stand in your Residence!"));
-//				return false;
-//			}
-//			BlockSaving.saveBlocks(player, res);
-//			player.sendMessage(Utils.normal(pluginPrefix+"&aSaved!"));
-//			return true;
-		}
-		
-		// Load residence blocks from save
-		if(args[0].equalsIgnoreCase("load")) {
-//			Residence res = Residence.getResidence(player.getLocation());
-//			if(res == null || res.isOwner(player) == false) {
-//				player.sendMessage(Utils.normal(pluginPrefix +"&cYou must stand in your Residence!"));
-//				return false;
-//			}
-//			if(BlockSaving.checkIfLoadExists(player, res) == false) {
-//				player.sendMessage(Utils.normal(pluginPrefix +"&cThis Residence does not have a save!"));
-//				return false;
-//			}
-//			List<Block> blocks = res.getArea().getBlocks();
-//			List<List<Block>> split = Methods.splitList(blocks, 100);
-//			for(List<Block> bList : split) {
-//				BlockCheck a = new BlockCheck(player, res, bList, new HashMap<Location, Material>());
-//				a.runTaskAsynchronously(Main.getInstance());
-//			}
-//			player.sendMessage(Utils.normal(pluginPrefix+"&aResidence loaded!"));
-//			return true;
-//			for(Block b : blocks) {
-//				int exists = BlockSaving.checkBlockExists(player, res, b);
-//				if(exists != -1) {
-//					Material mat = BlockSaving.getBlock(player, res, exists);
-//					player.getWorld().getBlockAt(b.getLocation()).setType(mat);
-//					continue;
-//				}
-//			}
-//			player.sendMessage(Utils.normal(pluginPrefix+"&aLoaded!"));
-//			return true;
-		}
-
 		
 		return false;
 	}
