@@ -4,15 +4,23 @@ Multiple area protection plugin for a survival server!
 
 ### Features
 
-#Ability to create multiple areas!
-#Ability to change settings per area!
-#Each Resident has their own permissions!
-#Ability to change Guest Rules: allow non-residents to modify your residence!
-#Creeper explosion and Enderman griefing protection!
-#Customizable greeting/farewell messages when entering a residence!
-#Ability to change the name of your residence!
-#Get notified whenever someone enters your residence!
-#And much more!
+Ability to create multiple areas!
+
+Ability to change settings per area!
+
+Each Resident has their own permissions!
+
+Ability to change Guest Rules: allow non-residents to modify your residence!
+
+Creeper explosion and Enderman griefing protection!
+
+Customizable greeting/farewell messages when entering a residence!
+
+Ability to change the name of your residence!
+
+Get notified whenever someone enters your residence!
+
+And much more!
 
 ### API
 
