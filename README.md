@@ -24,25 +24,43 @@ Multiple area protection plugin for a survival server!
 
 ### Commands
 
+```
 [] - optional argument, <> - required argument
 
 /res - Display the help message
+
 /res menu - Open the residence menu
+
 /res wand [player] - Get/give the residence claim wand (Admin only)
+
 /res create - Create your residence
+
 /res add <residence name> <player> - Add <player> to your residence
+
 /res remove <residence name> <player> - Remove <player> from your residence
+
 /res delete <residence name> - Delete your residence
+
 /res delall - Delete ALL residences (Admin only)
+
 /res list - List all residences (Admin only)
+
 /res forceload - Force load every residence (Admin only) (Should only be used in EXTREME circumstances)
+
 /res set <residence name> <greeting/farewell> <message | none | reset> - Set the greeting/farewell message to <message | none | default>
+
 /res sethome - Set your residence home
+
 /res home - Teleport to your residence home
+
 /res oset <player> <blocks> - Set the max claim area for <player> in <blocks> (Admin Only)
+
 /res maxarea - Check your maximum amount of claimable blocks
+
 /res setname <new name> - Set a new name for your residence
+
 /res showarea <start/stop> <residence name> - Start showing/stop showing the claimed area of your specified residence to other players with particles
+```
 
 ### Dependencies
 
