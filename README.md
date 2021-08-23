@@ -80,6 +80,6 @@ Residence residence = new Residence(area, player.getName());
 
 This plugin supports Spigot [1.17.x](https://www.spigotmc.org/wiki/buildtools/#1-17-1)
 
-### To-do
+### Download
 
-Open for suggestions!
+You may download the plugin jar [here](https://www.mediafire.com/file/df74njcev7l9he2/Residence.jar/file)
