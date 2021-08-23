@@ -24,7 +24,7 @@ Multiple area protection plugin for a survival server!
 
 ### Dependencies
 
-#This plugin requires [LuckPerms](https://luckperms.net/download) in order to function!
+This plugin requires [LuckPerms](https://luckperms.net/download) in order to function!
 
 ### API
 
