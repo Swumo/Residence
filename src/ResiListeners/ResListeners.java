@@ -106,7 +106,7 @@ public class ResListeners implements Listener{
 						if(offOwner != null) {
 							residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockPlacing", res);
 							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 									return;
@@ -119,7 +119,7 @@ public class ResListeners implements Listener{
 						if(owner == null && offOwner != null) {
 							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockPlacing", res);
 							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 									return;
@@ -130,14 +130,14 @@ public class ResListeners implements Listener{
 							}
 						}
 					}
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 						return;
 					}
 				}
 				if(residents == null){
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false) {
+					if(res.blockInResidence(block) == true && res.isOwner(player) == false) { 
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 						return;
@@ -152,7 +152,7 @@ public class ResListeners implements Listener{
 						if(owner != null) {
 							residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockPlacing", res);
 							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 									return;
@@ -165,7 +165,7 @@ public class ResListeners implements Listener{
 						if(owner == null && offOwner != null) {
 							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockPlacing", res);
 							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) { 
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 									return;
@@ -176,14 +176,14 @@ public class ResListeners implements Listener{
 							}
 						}
 					}
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 						return;
 					}
 				}
 				if(residents == null){
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) { //|| res2.blockInResidence(block) == true && res2.isOwner(player) == false) {
+					if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
 						return;
