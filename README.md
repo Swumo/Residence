@@ -2,6 +2,10 @@
  
 Multiple area protection plugin for a survival server!
 
+### DISCLAIMER
+
+This project has no relation to the Residence plugin available on Spigot! No code has been copied or in any other way modified from the resource.
+
 ### Features
 
 - Ability to create multiple areas!
