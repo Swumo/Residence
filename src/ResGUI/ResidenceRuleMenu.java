@@ -22,13 +22,7 @@ public class ResidenceRuleMenu {
 		gui_name = Utils.normal("&6&lResidence &0Rule Configuration");
 		inv = Bukkit.createInventory(null, rows);
 	}
-	
-//	1 	2 	3 	4 	5 	6 	7 	8 	9
-//	10  11	12	13	14	15	16	17	18
-//	19	20	21	22	23	24	25	26	27
-//	28	29	30	31	32	33	34	35	36
-//	37	38	39	40	41	42	43	44	45
-// 	46	47	48	49	50	51	52	53	54
+
 	
 	public static void updateInventory(final Player player, Residence res) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
@@ -130,7 +124,6 @@ public class ResidenceRuleMenu {
 	
 	public static Inventory GUI(Player player, Residence res) {
 		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-		//HashMap<String, Boolean> rules = res.getRules(res);
 		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
 		for(int i = 0; i < rows; i++) {
 			if(inv.getItem(i) == null) {

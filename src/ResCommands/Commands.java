@@ -28,12 +28,13 @@ import ResGUI.ResidencePreMainMenu;
 import ResMain.Main;
 import ResMethods.Methods;
 import ResUtils.Cuboid;
+import ResUtils.CustomFile;
 import ResUtils.Utils;
 import ResiListeners.Listeners;
 import ResiListeners.ResListeners;
 
 public class Commands implements TabExecutor{
-	private Main plugin;
+	private final Main plugin;
 	
 	public Commands(Main plugin, String command) {
 		this.plugin = plugin;
@@ -48,6 +49,7 @@ public class Commands implements TabExecutor{
 	public static HashMap<Player, Block> selectedBlock = new HashMap<Player, Block>();
 	public static HashMap<UUID, HashMap<Residence, BukkitTask>> residenceAreaShow = new HashMap<>();
 	public static BukkitTask testTask;
+	private static CustomFile messages = Main.getMessagesFile();
 	
 	public static String pluginPrefix = Main.getInstance().getConfig().getString("pluginPrefix");
 	
@@ -55,9 +57,12 @@ public class Commands implements TabExecutor{
 		ItemStack item = new ItemStack(Material.STICK);
 		ItemMeta meta = item.getItemMeta();
 		List<String> lore = new ArrayList<String>();
-		lore.add(Utils.normal("&7Left Click to select 1st position"));
-		lore.add(Utils.normal("&7Right Click to select 2nd position"));
-		lore.add(Utils.normal("&7&oShift Right Click to deselect"));
+		String left = messages.getConfigField("Wand.Left");
+		String right = messages.getConfigField("Wand.Right");
+		String shift = messages.getConfigField("Wand.Shift");
+		lore.add(Utils.normal(left));
+		lore.add(Utils.normal(right));
+		lore.add(Utils.normal(shift));
 		meta.setDisplayName(Utils.normal("&aClaim Wand"));	
 		meta.setLore(lore);
 		item.setItemMeta(meta);
@@ -79,13 +84,13 @@ public class Commands implements TabExecutor{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if(!(sender instanceof Player)) {
 			if(label.equalsIgnoreCase("res")) {
-				if(args.length < 1 || args.length < 2 || args.length < 3 || args.length < 4) {
+				if(args.length < 4) {
 					return false;
 				}
 				if(args[0].equalsIgnoreCase("set")) {
 					if(args[1].equalsIgnoreCase("parea")) {
 						Player newPlayer = Bukkit.getPlayer(args[2]);
-						int newArea = Integer.valueOf(args[3]);
+						int newArea = Integer.parseInt(args[3]);
 						Methods.setPlayerDefaultAreaSize(newPlayer, newArea);
 						newPlayer.sendMessage(Utils.normal(pluginPrefix+"&aYour new max area size has been set to &e" +newArea+"&a!"));
 						sender.sendMessage(Main.ANSI_CYAN + "[Residence] " + Main.ANSI_RESET + Main.ANSI_YELLOW + newPlayer.getName() + "'s " + Main.ANSI_GREEN + "new max area has been set to " + Main.ANSI_YELLOW+ newArea + Main.ANSI_RESET);
@@ -98,46 +103,47 @@ public class Commands implements TabExecutor{
 		Player player = (Player) sender;
 		
 		if(args.length < 1) {
-			player.sendMessage(Utils.normal("&7&m-----------------&e&lResidence &a4.0&7&m-----------------"));
-			player.sendMessage(Utils.normal("&e/res | /res ? &7- &bDisplay this message"));
-			player.sendMessage(Utils.normal("&e/res menu &7- &bOpen Residence Menu"));
-			player.sendMessage(Utils.normal("&e/res wand <player> &7- &bGet/Give Residence Claim Wand &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res create &7- &bCreate your Residence"));
-			player.sendMessage(Utils.normal("&e/res add <residence name> <player> &7- &bAdd <player> to your Residence"));
-			player.sendMessage(Utils.normal("&e/res remove <residence name> <player> &7- &bRemove <player> from your Residence"));
-			player.sendMessage(Utils.normal("&e/res delete <residence name> &7- &bDelete your Residence"));
-			player.sendMessage(Utils.normal("&e/res delall &7- &bDelete &cALL &bResidences &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res list &7- &bList all Residences &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res forceload &7- &bForce load every Residence &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res set <residence name> greeting/farewell <message> | none | reset &7- &bSet greeting/farewell message to <message> | none | default"));
-			player.sendMessage(Utils.normal("&e/res sethome &7- &bSet your Residence home"));
-			player.sendMessage(Utils.normal("&e/res home &7- &bTeleport to your Residence home"));
-			player.sendMessage(Utils.normal("&e/res oset <player> <blocks> &7- &bSet max claim area in blocks &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res maxarea &7- &bCheck your max amount of claimable blocks"));
-			player.sendMessage(Utils.normal("&e/res setname <newname> &7- &bSet a new name for your Residence"));
-			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- &bShow the claimed area of a Residence to other players with particles"));
+			
+			player.sendMessage(Utils.normal("&7&m-----------------&e&lResidence&7&m-----------------"));
+			player.sendMessage(Utils.normal("&e/res | /res ? &7- " + messages.getConfigField("Help.Res")));
+			player.sendMessage(Utils.normal("&e/res menu &7- " + messages.getConfigField("Help.Menu")));
+			player.sendMessage(Utils.normal("&e/res wand <player> &7- " + messages.getConfigField("Help.Wand")));
+			player.sendMessage(Utils.normal("&e/res create &7- " + messages.getConfigField("Help.Create")));
+			player.sendMessage(Utils.normal("&e/res add <residence name> <player> &7- " + messages.getConfigField("Help.Add")));
+			player.sendMessage(Utils.normal("&e/res remove <residence name> <player> &7- " + messages.getConfigField("Help.Remove")));
+			player.sendMessage(Utils.normal("&e/res delete <residence name> &7- " + messages.getConfigField("Help.Delete")));
+			player.sendMessage(Utils.normal("&e/res delall &7- " + messages.getConfigField("Help.Delall")));
+			player.sendMessage(Utils.normal("&e/res list &7- " + messages.getConfigField("Help.List")));
+			player.sendMessage(Utils.normal("&e/res forceload &7- " + messages.getConfigField("Help.Forceload")));
+			player.sendMessage(Utils.normal("&e/res set <residence name> greeting/farewell <message> | none | reset &7- " + messages.getConfigField("Help.Set")));
+			player.sendMessage(Utils.normal("&e/res sethome &7- " + messages.getConfigField("Help.Sethome")));
+			player.sendMessage(Utils.normal("&e/res home <residence home> &7- " + messages.getConfigField("Help.Home")));
+			player.sendMessage(Utils.normal("&e/res oset <player> <blocks> &7- " + messages.getConfigField("Help.Oset")));
+			player.sendMessage(Utils.normal("&e/res maxarea &7- " + messages.getConfigField("Help.Maxarea")));
+			player.sendMessage(Utils.normal("&e/res setname <newname> &7- " + messages.getConfigField("Help.Setname")));
+			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- " + messages.getConfigField("Help.Showarea")));
 			player.sendMessage(Utils.normal("&7&m-----------------------------------------------"));
 			return true;
 		}
 		if(args[0].equalsIgnoreCase("?")) {
-			player.sendMessage(Utils.normal("&7&m-----------------&e&lResidence &a4.0&7&m-----------------"));
-			player.sendMessage(Utils.normal("&e/res | /res ? &7- &bDisplay this message"));
-			player.sendMessage(Utils.normal("&e/res menu &7- &bOpen Residence Menu"));
-			player.sendMessage(Utils.normal("&e/res wand <player> &7- &bGet/Give Residence Claim Wand &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res create &7- &bCreate your Residence"));
-			player.sendMessage(Utils.normal("&e/res add <residence name> <player> &7- &bAdd <player> to your Residence"));
-			player.sendMessage(Utils.normal("&e/res remove <residence name> <player> &7- &bRemove <player> from your Residence"));
-			player.sendMessage(Utils.normal("&e/res delete <residence name> &7- &bDelete your Residence"));
-			player.sendMessage(Utils.normal("&e/res delall &7- &bDelete &cALL &bResidences &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res list &7- &bList all Residences &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res forceload &7- &bForce load every Residence &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res set <residence name> greeting/farewell <message> | none | reset &7- &bSet greeting/farewell message to <message> | none | default"));
-			player.sendMessage(Utils.normal("&e/res sethome &7- &bSet your Residence home"));
-			player.sendMessage(Utils.normal("&e/res home &7- &bTeleport to your Residence home"));
-			player.sendMessage(Utils.normal("&e/res oset <player> <blocks> &7- &bSet max claim area in blocks &c[Admin Only]"));
-			player.sendMessage(Utils.normal("&e/res maxarea &7- &bCheck your max amount of claimable blocks"));
-			player.sendMessage(Utils.normal("&e/res setname <newname> &7- &bSet a new name for your Residence"));
-			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- &bShow the claimed area of a Residence to other players with particles"));
+			player.sendMessage(Utils.normal("&7&m-----------------&e&lResidence&7&m-----------------"));
+			player.sendMessage(Utils.normal("&e/res | /res ? &7- " + messages.getConfigField("Help.Res")));
+			player.sendMessage(Utils.normal("&e/res menu &7- " + messages.getConfigField("Help.Menu")));
+			player.sendMessage(Utils.normal("&e/res wand <player> &7- " + messages.getConfigField("Help.Wand")));
+			player.sendMessage(Utils.normal("&e/res create &7- " + messages.getConfigField("Help.Create")));
+			player.sendMessage(Utils.normal("&e/res add <residence name> <player> &7- " + messages.getConfigField("Help.Add")));
+			player.sendMessage(Utils.normal("&e/res remove <residence name> <player> &7- " + messages.getConfigField("Help.Remove")));
+			player.sendMessage(Utils.normal("&e/res delete <residence name> &7- " + messages.getConfigField("Help.Delete")));
+			player.sendMessage(Utils.normal("&e/res delall &7- " + messages.getConfigField("Help.Delall")));
+			player.sendMessage(Utils.normal("&e/res list &7- " + messages.getConfigField("Help.List")));
+			player.sendMessage(Utils.normal("&e/res forceload &7- " + messages.getConfigField("Help.Forceload")));
+			player.sendMessage(Utils.normal("&e/res set <residence name> greeting/farewell <message> | none | reset &7- " + messages.getConfigField("Help.Set")));
+			player.sendMessage(Utils.normal("&e/res sethome &7- " + messages.getConfigField("Help.Sethome")));
+			player.sendMessage(Utils.normal("&e/res home <residence home> &7- " + messages.getConfigField("Help.Home")));
+			player.sendMessage(Utils.normal("&e/res oset <player> <blocks> &7- " + messages.getConfigField("Help.Oset")));
+			player.sendMessage(Utils.normal("&e/res maxarea &7- " + messages.getConfigField("Help.Maxarea")));
+			player.sendMessage(Utils.normal("&e/res setname <newname> &7- " + messages.getConfigField("Help.Setname")));
+			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- " + messages.getConfigField("Help.Showarea")));
 			player.sendMessage(Utils.normal("&7&m-----------------------------------------------"));
 			return true;
 		}
@@ -147,10 +153,11 @@ public class Commands implements TabExecutor{
 			plugin.reloadConfig();
 			plugin.saveConfig();
 			resetVariables();
-			player.sendMessage(Utils.normal(pluginPrefix+"&aConfig reloaded!"));
+			messages.reload();
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Reload")));
 			return true;
 		}
-//		
+
 		// Menu
 		
 		if(args[0].equalsIgnoreCase("menu")) {
@@ -227,15 +234,15 @@ public class Commands implements TabExecutor{
 		if(args[0].equalsIgnoreCase("showarea")) {
 			LinkedList<Residence> residences = Residence.getResidences(player);
 			if(residences == null || residences.isEmpty()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou do not have any Residences!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoResidences")));
 				return false;
 			}
 			if(args.length < 2) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify either &estart &cor &estop&c!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.StartOrStop")));
 				return false;
 			}
 			if(args.length < 3) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a Residence name!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Name")));
 				return false;
 			}
 			String name = null;
@@ -246,14 +253,14 @@ public class Commands implements TabExecutor{
 			name = name.trim();
 			Residence res = Residence.getResidence(name);
 			if(res == null) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cResidence does not exist!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Exists")));
 				return false;
 			}
 			String value = args[1];
 			value = value.toLowerCase();
 			if(value.equalsIgnoreCase("start")) {
 				if(residenceAreaShow.get(player.getUniqueId()) != null && residenceAreaShow.get(player.getUniqueId()).containsKey(res)) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cYou are already showing this Residence area to other players!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.ShowingArea")));
 					return false;
 				}
 				Cuboid area = res.getArea();
@@ -261,12 +268,12 @@ public class Commands implements TabExecutor{
 				Location loc2 = area.getUpperSW();	
 				List<Vector> edges = Utils.edges(loc1.toVector(), loc2.toVector());
 				Methods.displayResidenceArea(player, edges, res);
-				player.sendMessage(Utils.normal(pluginPrefix+"&aYou are now showing your Residence area to other players!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NowShowing")));
 				return true;
 			}
 			if(value.equalsIgnoreCase("stop")) {
 				if(residenceAreaShow.get(player.getUniqueId()) == null) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cYou are not showing this Residence's area!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NotShowing")));
 					return false;
 				}
 				HashMap<Residence, BukkitTask> map = residenceAreaShow.get(player.getUniqueId());
@@ -284,7 +291,7 @@ public class Commands implements TabExecutor{
 				else {
 					residenceAreaShow.put(player.getUniqueId(), map);
 				}
-				player.sendMessage(Utils.normal(pluginPrefix+"&eYou have stopped showing your Residence area to other players!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.StoppedShowing")));
 				return true;
 			}
 			
@@ -292,25 +299,24 @@ public class Commands implements TabExecutor{
 		}
 		
 		
-		
 		// Wand
 		
 		if(args[0].equalsIgnoreCase("wand")) {
 			if(!player.isOp()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot run this command!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
 			}
 			if(args.length < 2) {
 				ItemStack wand = giveWand(player);
 				player.getInventory().addItem(wand);
-				player.sendMessage(Utils.normal(pluginPrefix+"&eResidence Claim Wand was given to you!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
 				return true;
 			}
 			String name = args[1];
 			Player p = Bukkit.getPlayer(name);
 			ItemStack wand = giveWand(p);
 			p.getInventory().addItem(wand);
-			p.sendMessage(Utils.normal(pluginPrefix+"&eResidence Claim Wand was given to you!"));
+			p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
 			return true;
 		}
 		
@@ -320,13 +326,13 @@ public class Commands implements TabExecutor{
 		if(args[0].equalsIgnoreCase("sethome")) {
 			Residence res = Residence.getResidence(player.getLocation());
 			if(res == null) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cYou must stand in your Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.MustStand")));
 				return false;
 			}
 			Location center = player.getLocation();
 			Methods.saveHome(player, center, res);
 			Residence.saveResidenceData(player.getUniqueId(), res, false);
-			player.sendMessage(Utils.normal(pluginPrefix +"&aResidence home set!"));
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.HomeSet")));
 			return true;
 		}
 		
@@ -335,7 +341,7 @@ public class Commands implements TabExecutor{
 		if(args[0].equalsIgnoreCase("setname")) {
 			Residence res = Residence.getResidence(player.getLocation());
 			if(res == null || res.isOwner(player) == false) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cYou must stand in your Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.MustStand")));
 				return false;
 			}
 			String newName = null;
@@ -346,7 +352,7 @@ public class Commands implements TabExecutor{
 			newName = newName.trim();
 			boolean alreadyHasName = Residence.hasName(player.getUniqueId(), newName);
 			if(alreadyHasName == true) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cYou cannot have duplicate Residence names!"));
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.DuplicateNames")));
 				return false;
 			}
 			int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
@@ -359,7 +365,7 @@ public class Commands implements TabExecutor{
 			res.setName(newName);
 			Residence.saveResidenceData(player.getUniqueId(), res, true, index);
 			ResListeners.playerWasInResidence.put(player.getName(), newName);
-			player.sendMessage(Utils.normal(pluginPrefix +"&aResidence name set!"));
+			player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.NameSet")));
 			return true;
 		}
 		
@@ -367,7 +373,7 @@ public class Commands implements TabExecutor{
 			
 		if(args[0].equalsIgnoreCase("home")) {
 			if(args.length < 2) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cPlease specify your Residence name!"));
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Name")));
 				return false;
 			}
 			String name = null;
@@ -380,7 +386,7 @@ public class Commands implements TabExecutor{
 				Methods.teleportToHome(player, name);
 				return true;	
 			}
-			player.sendMessage(Utils.normal(pluginPrefix +"&cThat Residence does not exist!"));
+			player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Exists")));
 			return false;
 		}
 		
@@ -389,11 +395,11 @@ public class Commands implements TabExecutor{
 		
 		if(args[0].equalsIgnoreCase("add")) {
 			if(args.length < 2) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a player!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
 				return false;
 			}
 			if(args.length < 3) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify the name of the Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Name")));
 				return false;
 			}
 			String name = args[1];
@@ -405,22 +411,26 @@ public class Commands implements TabExecutor{
 			resName = resName.trim();
 			Residence res = Residence.getResidence(player, resName);
 			if(res == null) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cResidence does not exist!"));
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Exists")));
 				return false;
 			}
 			if(name.equals(player.getName())) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot add yourself to your own Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.OwnerAdd")));
 				return false;
 			}
 			Player playerToAdd = Bukkit.getPlayer(name);
 			if(playerToAdd == null) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlayer is not online!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.OfflinePlayer")));
 				return false;
 			}
 			res = Residence.addResident(player, playerToAdd, res);
 			Methods.setResidentPerms(playerToAdd, res);
-			player.sendMessage(Utils.normal(pluginPrefix+"&e"+name+" &ahas been added to your Residence!"));
-			playerToAdd.sendMessage(Utils.normal(pluginPrefix+"&eYou have been added to &6"+player.getName()+"'s &eResidence!"));
+			String toOwner = messages.getConfigField("Commands.AddedPlayer");
+			String toAdded = messages.getConfigField("Commands.AddedTo");
+			toAdded = toAdded.replace("%name%", player.getName());
+			toOwner = toOwner.replace("%name%", name);
+			player.sendMessage(Utils.normal(pluginPrefix+toOwner));
+			playerToAdd.sendMessage(Utils.normal(pluginPrefix+toAdded));
 			return true;
 		}
 
@@ -429,11 +439,11 @@ public class Commands implements TabExecutor{
 		
 		if(args[0].equalsIgnoreCase("remove")) {
 			if(args.length < 2) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a player!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
 				return false;
 			}
 			if(args.length < 3) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify the name of the Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Name")));
 				return false;
 			}
 			String name = args[1];
@@ -445,22 +455,26 @@ public class Commands implements TabExecutor{
 			resName = resName.trim();
 			Residence res = Residence.getResidence(player, resName);
 			if(res == null) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cResidence does not exist!"));
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Exists")));
 				return false;
 			}
 			if(name.equals(player.getName())) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot remove yourself from your own Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.OwnerRemove")));
 				return false;
 			}
 			Player playerToRemove = Bukkit.getPlayer(name);
 			if(playerToRemove == null) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlayer is not online!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.OfflinePlayer")));
 				return false;
 			}
 			res = Residence.removeResident(player, playerToRemove, res);
 			Methods.removeResidentPerms(playerToRemove.getName(), res);
-			player.sendMessage(Utils.normal(pluginPrefix+"&e"+name+" &ahas been removed to your Residence!"));
-			playerToRemove.sendMessage(Utils.normal(pluginPrefix+"&eYou have been removed from &6"+player.getName()+"'s &eResidence!"));
+			String toOwner = messages.getConfigField("Commands.RemovedPlayer");
+			String toRemoved = messages.getConfigField("Commands.RemovedFrom");
+			toOwner = toOwner.replace("%name%", name);
+			toRemoved = toRemoved.replace("%name%", player.getName());
+			player.sendMessage(Utils.normal(pluginPrefix+toOwner));
+			playerToRemove.sendMessage(Utils.normal(pluginPrefix+toRemoved));
 			return true;
 		}
 		
@@ -473,23 +487,27 @@ public class Commands implements TabExecutor{
 			int maxRes = Methods.getPlayerMaxResidenceCount(player);
 			if(resi != null) {
 				if(resi.size() >= maxRes) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot have more than &e" +maxRes + " &cResidences!"));
+					String send = messages.getConfigField("Commands.MaxResidences");
+					send = send.replace("%amount%", String.valueOf(maxRes));
+					player.sendMessage(Utils.normal(pluginPrefix+send));
 					return false;
 				}	
 			}
 			if(block1.isEmpty() || block2.isEmpty()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou do not have an area selected!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoArea")));
 				return false;
 			}
 			if(!block1.containsKey(player) || !block2.containsKey(player)) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou do not have an area selected!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoArea")));
 				return false;
 			}
 			Location b1Loc = block1.get(player).getLocation();
 			Location b2Loc = block2.get(player).getLocation();
 			Cuboid area = new Cuboid(b1Loc, b2Loc);
 			if(area.getBlocks().size() >= defaultArea) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot have an area bigger than "+defaultArea+" blocks! (Currently: "+area.getBlocks().size())+")");
+				String send = messages.getConfigField("Commands.AreaOverMax");
+				send = send.replace("%size%", String.valueOf(defaultArea)).replace("%current%", String.valueOf(area.getBlocks().size()));
+				player.sendMessage(Utils.normal(pluginPrefix+send));
 				return false;
 			}
 			UUID owner = player.getUniqueId();
@@ -500,7 +518,7 @@ public class Commands implements TabExecutor{
 					List<Block> creatingResBlocks = area.getBlocks();
 					boolean isClear = Collections.disjoint(creatingResBlocks, existingResBlocks);
 					if(isClear == false) {
-						player.sendMessage(Utils.normal(pluginPrefix+"&cYour selected area claims another Residence! Please select a new area!"));
+						player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.SelectedAnother")));
 						block1.remove(player);
 						block2.remove(player);
 						if(Listeners.task1 != null) {
@@ -519,14 +537,10 @@ public class Commands implements TabExecutor{
 				return false;
 			}
 			Residence res = new Residence(area, player.getName());
-			player.sendMessage(Utils.normal(pluginPrefix+"&eResidence created!"));
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Created")));
 			Residence.saveResidenceData(owner, res, true);
-			if(block1.containsKey(player)) {
-				block1.remove(player);	
-			}
-			if(block2.containsKey(player)) {
-				block2.remove(player);	
-			}
+			block1.remove(player);
+			block2.remove(player);
 			if(Listeners.task1 != null) {
 				Listeners.task1.cancel();
 			}
@@ -542,7 +556,7 @@ public class Commands implements TabExecutor{
 		
 		if(args[0].equalsIgnoreCase("delete")) {
 			if(args.length < 2) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cPlease specify the name of the Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Name")));
 				return false;
 			}
 			String name = null;
@@ -553,19 +567,19 @@ public class Commands implements TabExecutor{
 			name = name.trim();
 			Residence res = Residence.getResidence(player, name);
 			if(res == null) {
-				player.sendMessage(Utils.normal(pluginPrefix +"&cResidence does not exist!"));
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Exists")));
 				return false;
 			}
 			ResListeners.promptedUser.put(player.getName(), true);
 			ResListeners.promptedUserResidence.put(player.getName(), res);
-			player.sendMessage(Utils.normal(pluginPrefix+"&cAre you sure you want to delete your Residence? Type &aYes &cto delete your Residence or &4No &cto cancel Residence deletion"));
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.ConfirmDelete")));
 			return true;
 		}
 		
 		// Delete all residences
 		if(args[0].equalsIgnoreCase("delall")) {
 			if(!player.isOp()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot run this command!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
 			}
 			HashMap<UUID, LinkedList<Residence>> residences = Residence.getResidenceMap();
@@ -588,10 +602,10 @@ public class Commands implements TabExecutor{
 				
 				if(p != null && p.isOnline()) {
 					if(amount == 1) {
-						p.sendMessage(Utils.normal(pluginPrefix+"&eYour Residence has been deleted by an Admin."));
+						p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AdminDeletedOne")));
 					}
 					if(amount > 1) {
-						p.sendMessage(Utils.normal(pluginPrefix+"&eYour Residences have been deleted by an Admin."));
+						p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AdminDeletedMore")));
 					}
 				}
 				Methods.removePermissionsExceptMeta(p);	
@@ -600,7 +614,7 @@ public class Commands implements TabExecutor{
 				Residence r = toDelete.get(i);
 				Main.deletePlayerResidence(Bukkit.getOfflinePlayer(r.getOwner()).getUniqueId(), r);
 			}
-			player.sendMessage(Utils.normal(pluginPrefix+"&aAll Residences successfully deleted!"));
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AllDeleted")));
 			return true;
 		}
 	
@@ -608,12 +622,12 @@ public class Commands implements TabExecutor{
 		
 		if(args[0].equalsIgnoreCase("list")) {
 			if(!player.isOp()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot run this command!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
 			}
 			HashMap<UUID, LinkedList<Residence>> residences = Residence.getResidenceMap();
 			if(residences.isEmpty()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cThere are no Residences."));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoResidencesList")));
 				return false;
 			}
 			player.sendMessage(Utils.normal("&l &l &l &l &l &l &l &l &l &l &eResidence List"));
@@ -629,18 +643,18 @@ public class Commands implements TabExecutor{
 		
 		if(args[0].equalsIgnoreCase("forceload")) {
 			if(!player.isOp()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot run this command!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
 			}
 			Main.loadResidences();
-			player.sendMessage(Utils.normal(pluginPrefix+"&eResidences successfully force loaded!"));
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.ForceLoad")));
 			return true;
 		}
 
 		// Set greeting/farewell
 		if(args[0].equalsIgnoreCase("set")) {
 			if(args.length < 2) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify the name of the Residence!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Name")));
 				return false;
 			}
 			String name = null;
@@ -657,7 +671,7 @@ public class Commands implements TabExecutor{
 			// If setting greeting message
 			if(args[stoppedOn + 1].equalsIgnoreCase("greeting")) {
 				if(stoppedOn + 2 >= args.length) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a message! Or type &enone &cto remove it."));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.MessageOrNone")));
 					return false;
 				}
 				// If message was "none"
@@ -666,7 +680,7 @@ public class Commands implements TabExecutor{
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setGreetingMessage("null");
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
-					player.sendMessage(Utils.normal(pluginPrefix+"&eYour new Residence greeting message has been set!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.GreetingSet")));
 					return true;
 				}
 				// If message was "reset"
@@ -675,10 +689,10 @@ public class Commands implements TabExecutor{
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setGreetingMessage(Main.greetingMessage);
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
-					player.sendMessage(Utils.normal(pluginPrefix+"&eYour Residence greeting message has been reset!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.GreetingSet")));
 					return true;
 				}
-				String message = new String();
+				String message = "";
 				for(int i = stoppedOn + 2; i < args.length; i++) {
 					message += args[i] + " ";
 				}
@@ -686,13 +700,13 @@ public class Commands implements TabExecutor{
 				int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 				res.setGreetingMessage(message);
 				Residence.saveResidenceData(player.getUniqueId(), res, true, index);
-				player.sendMessage(Utils.normal(pluginPrefix+"&eYour new Residence greeting message has been set!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.GreetingSet")));
 				return true;
 			}
 			// If setting farewell message
 			if(args[stoppedOn + 1].equalsIgnoreCase("farewell")) {
 				if(stoppedOn + 2 >= args.length) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a message! Or type &enone &cto remove it."));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.MessageOrNone")));
 					return false;
 				}
 				// If message was "none"
@@ -701,7 +715,7 @@ public class Commands implements TabExecutor{
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setFarewellMessage("null");
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
-					player.sendMessage(Utils.normal(pluginPrefix+"&eYour new Residence farewell message has been set!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.FarewellSet")));
 					return true;
 				}
 				// If message was "reset"
@@ -710,10 +724,10 @@ public class Commands implements TabExecutor{
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setFarewellMessage(Main.farewellMessage);
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
-					player.sendMessage(Utils.normal(pluginPrefix+"&eYour Residence farewell message has been reset!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.FarewellSet")));
 					return true;
 				}
-				String message = new String();
+				String message = "";
 				for(int i = stoppedOn + 2; i < args.length; i++) {
 					message += args[i] + " ";
 				}
@@ -721,52 +735,60 @@ public class Commands implements TabExecutor{
 				int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 				res.setFarewellMessage(message);
 				Residence.saveResidenceData(player.getUniqueId(), res, true, index);
-				player.sendMessage(Utils.normal(pluginPrefix+"&eYour new Residence farewell message has been set!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.FarewellSet")));
 				return true;
 			}
-			player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify either &egreeting &cor &efarewell&c!"));
+			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.GreetingOrFarewell")));
 			return false;
 		}
 		
 		// OP Set blocks/Max residences
 		if(args[0].equalsIgnoreCase("oset")) {
 			if(!player.isOp()) {
-				player.sendMessage(Utils.normal(pluginPrefix+"&cYou cannot run this command!"));
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
 			}
 			if(args[1].equalsIgnoreCase("parea")) {
 				if(args.length < 3) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a player!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
 					return false;
 				}
 				if(args.length < 4) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a new area in blocks!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NewArea")));
 					return false;
 				}
 				Player newPlayer = Bukkit.getPlayer(args[2]);
 				int newArea = Integer.valueOf(args[3]);
 				Methods.setPlayerDefaultAreaSize(newPlayer, newArea);
-				newPlayer.sendMessage(Utils.normal(pluginPrefix+"&aAn Admin has set your new max area size to &e" +newArea+"&a!"));
+				String sendOther = messages.getConfigField("Commands.AdminSetAreaOther");
+				sendOther = sendOther.replace("%size%", String.valueOf(newArea));
+				newPlayer.sendMessage(Utils.normal(pluginPrefix+sendOther));
 				if(newPlayer != player) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&aYou have set &e"+newPlayer.getName()+"'s &anew max area size to &e"+newArea+"&a!"));					
+					String sendOwn = messages.getConfigField("Commands.AdminSetAreaOwn");
+					sendOwn = sendOwn.replace("%name%", newPlayer.getName()).replace("%size%", String.valueOf(newArea));
+					player.sendMessage(Utils.normal(pluginPrefix+sendOwn));					
 				}
 				return true;
 			}
 			if(args[1].equalsIgnoreCase("maxres")) {
 				if(args.length < 3) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a player!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
 					return false;
 				}
 				if(args.length < 4) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&cPlease specify a number!"));
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoNumber")));
 					return false;
 				}
 				Player newPlayer = Bukkit.getPlayer(args[2]);
 				int newRes = Integer.valueOf(args[3]);
 				Methods.setPlayerMaxResidenceCount(newPlayer, newRes);
-				newPlayer.sendMessage(Utils.normal(pluginPrefix+"&aAn Admin has set your new max Residence count to &e" +newRes+"&a!"));
+				String sendOther = messages.getConfigField("Commands.AdminSetResidenceOther");
+				sendOther = sendOther.replace("%count%", String.valueOf(newRes));
+				newPlayer.sendMessage(Utils.normal(pluginPrefix+sendOther));
 				if(newPlayer != player) {
-					player.sendMessage(Utils.normal(pluginPrefix+"&aYou have set &e"+newPlayer.getName()+"'s &anew max Residence count to &e"+newRes+"&a!"));					
+					String sendOwn = messages.getConfigField("Commands.AdminSetResidenceOwn");
+					sendOwn = sendOther.replace("%count%", String.valueOf(newRes)).replace("%name%", newPlayer.getName());
+					player.sendMessage(Utils.normal(pluginPrefix+sendOwn));					
 				}
 				return true;
 			}
@@ -775,14 +797,18 @@ public class Commands implements TabExecutor{
 		// Check your max area size
 		if(args[0].equalsIgnoreCase("maxarea")) {
 			int amount = Methods.getPlayerDefaultAreaSize(player);
-			player.sendMessage(Utils.normal(pluginPrefix+"&aYour maximum amount of claimable blocks is &e"+amount+"&a!"));
+			String send = messages.getConfigField("Commands.MaxClaimBlocks");
+			send = send.replace("%amount%", String.valueOf(amount));
+			player.sendMessage(Utils.normal(pluginPrefix+send));
 			return true;
 		}
 		
 		// Check your max residence count
 		if(args[0].equalsIgnoreCase("maxres")) {
 			int amount = Methods.getPlayerMaxResidenceCount(player);
-			player.sendMessage(Utils.normal(pluginPrefix+"&aYour maximum amount of Residences is &e"+amount+"&a!"));
+			String send = messages.getConfigField("Commands.MaxResidences");
+			send = send.replace("%amount%", String.valueOf(amount));
+			player.sendMessage(Utils.normal(pluginPrefix+send));
 			return true;
 		}
 		

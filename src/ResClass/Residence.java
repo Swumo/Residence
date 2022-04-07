@@ -30,7 +30,7 @@ import net.luckperms.api.node.types.MetaNode;
 public class Residence {
 	
 	private Cuboid Area;
-	private String Owner;
+	private final String Owner;
 	private List<UUID> Residents;
 	private String Name;
 	private Location Center;
@@ -41,9 +41,9 @@ public class Residence {
 	private float yaw, pitch;
 	
 	
-	private static HashMap<UUID, LinkedList<Residence>> MasterList = new HashMap<>();
-	private static HashMap<UUID, LinkedList<Cuboid>> ExtendedAreas = new HashMap<>();
-	private static HashMap<UUID, LinkedList<HashMap<String, Cuboid>>> directions = new HashMap<>();
+	private static final HashMap<UUID, LinkedList<Residence>> MasterList = new HashMap<>();
+	private static final HashMap<UUID, LinkedList<Cuboid>> ExtendedAreas = new HashMap<>();
+	private static final HashMap<UUID, LinkedList<HashMap<String, Cuboid>>> directions = new HashMap<>();
 	public static List<String> allRules = Arrays.asList("allowBlockPlacing", "allowBlockBreaking", "allowBlockInteraction",
 			"allowEntityInteraction", "allowDamageEntities", "allowVehicleDestroy", "allowTNTPlacing", "allowTeleport",
 			"allowEntering", "allowCreeperGriefing", "allowEndermanGriefing");
@@ -368,12 +368,8 @@ public class Residence {
 	 * @param player - Player
 	 */
 	public void deleteAll(Player player) {
-		if(MasterList.containsKey(player.getUniqueId())) {
-			MasterList.remove(player.getUniqueId());
-		}
-		if(ExtendedAreas.containsKey(player.getUniqueId())) {
-			ExtendedAreas.remove(player.getUniqueId());
-		}
+		MasterList.remove(player.getUniqueId());
+		ExtendedAreas.remove(player.getUniqueId());
 	}
 	
 	/**
@@ -404,10 +400,7 @@ public class Residence {
 	 */
 	public boolean playerInResidence(Player player) {
 		Location pLoc = player.getLocation();
-		if(Area.contains(pLoc)) {
-			return true;
-		}
-		return false;
+		return Area.contains(pLoc);
 	}
 	
 	/**
@@ -417,10 +410,7 @@ public class Residence {
 	 */
 	public boolean entityInResidence(Entity entity) {
 		Location loc = entity.getLocation();
-		if(Area.contains(loc)) {
-			return true;
-		}
-		return false;
+		return Area.contains(loc);
 	}
 	
 	/**
@@ -478,7 +468,7 @@ public class Residence {
 	
 	/**
 	 * Get player residence from player UUID
-	 * @param playerName - Specified player UUID
+	 * @param id - Specified player UUID
 	 * @return Residence list
 	 */
 	public static LinkedList<Residence> getResidences(UUID id) {
@@ -536,10 +526,7 @@ public class Residence {
 	 */
 	public boolean blockInResidence(Block block) {
 		List<Block> blocks = Area.getBlocks();
-		if(blocks.contains(block)) {
-			return true;
-		}
-		return false;
+		return blocks.contains(block);
 	}
 	
 	/**
@@ -549,10 +536,7 @@ public class Residence {
 	 */
 	public boolean isOwner(Player player) {
 		String pName = player.getName();
-		if(pName.equalsIgnoreCase(Owner)) {
-			return true;
-		}
-		return false;
+		return pName.equalsIgnoreCase(Owner);
 	}
 	
 	
@@ -877,7 +861,7 @@ public class Residence {
 		if(Residents == null) {
 			return Name + "/" + Area.toString() + "/" + Owner + "/null";
 		}
-		String toReturn = new String();
+		String toReturn = "";
 		toReturn += Name + "/" + Area.toString() + "/" + Owner + "/";
 		for(UUID p : Residents) {
 			toReturn += p + "/";

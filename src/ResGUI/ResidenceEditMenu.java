@@ -21,14 +21,6 @@ public class ResidenceEditMenu {
 		inv = Bukkit.createInventory(null, rows);
 	}
 	
-	
-//	1 	2 	3 	4 	5 	6 	7 	8 	9
-//	10  11	12	13	14	15	16	17	18
-//	19	20	21	22	23	24	25	26	27
-//	28	29	30	31	32	33	34	35	36
-//	37	38	39	40	41	42	43	44	45
-// 	46	47	48	49	50	51	52	53	54
-	
 	public static void updateInventory(final Player player) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
     	if(inv != null) {
@@ -40,8 +32,6 @@ public class ResidenceEditMenu {
     			}
     			else continue;
     		}
-    		
-    		// 10 12 14 16 18 | 19 back
     		
     		Utils.createItem(inv, Material.PLAYER_HEAD, 1, 10, "&a&lAdd Player", "&7&oAdd a player to your residence");
     		Utils.createItem(inv, Material.PLAYER_HEAD, 1, 12, "&c&lRemove Player", "&7&oRemove a player from your residence");
@@ -68,8 +58,6 @@ public class ResidenceEditMenu {
 			}
 			else continue;
 		}
-		
-		// 10 12 14 16 18 | 19 back
 		
 		Utils.createItem(inv, Material.PLAYER_HEAD, 1, 10, "&a&lAdd Player", "&7&oAdd a player to your residence");
 		Utils.createItem(inv, Material.PLAYER_HEAD, 1, 12, "&c&lRemove Player", "&7&oRemove a player from your residence");

@@ -36,7 +36,7 @@ import net.md_5.bungee.api.ChatColor;
 public class Listeners implements Listener{
 
 	@SuppressWarnings("unused")
-	private Main plugin;
+	private final Main plugin;
 	
 	public Listeners(Main plugin) {
 		this.plugin = plugin;
@@ -63,21 +63,11 @@ public class Listeners implements Listener{
 							player.sendMessage(Utils.normal(Commands.pluginPrefix +"&cYou do not have any positions selected!"));
 							return;
 						}
-						if(Commands.block1.containsKey(player)) {
-							Commands.block1.remove(player);	
-						}
-						if(Commands.block2.containsKey(player)) {
-							Commands.block2.remove(player);	
-						}
-						if(Commands.block1LeftClicked.containsKey(player)) {
-							Commands.block1LeftClicked.remove(player);	
-						}
-						if(Commands.block2RightClicked.containsKey(player)) {
-							Commands.block2RightClicked.remove(player);	
-						}
-						if(Commands.selectedBlock.containsKey(player)) {
-							Commands.selectedBlock.remove(player);	
-						}
+						Commands.block1.remove(player);
+						Commands.block2.remove(player);
+						Commands.block1LeftClicked.remove(player);
+						Commands.block2RightClicked.remove(player);
+						Commands.selectedBlock.remove(player);
 						if(task1 != null) {
 							task1.cancel();
 						}

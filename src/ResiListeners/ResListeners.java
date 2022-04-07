@@ -50,7 +50,7 @@ import net.md_5.bungee.api.ChatColor;
 public class ResListeners implements Listener{
 
 	@SuppressWarnings("unused")
-	private Main plugin;
+	private final Main plugin;
 	
 	public ResListeners(Main plugin) {
 		this.plugin = plugin;
@@ -62,10 +62,40 @@ public class ResListeners implements Listener{
 	public static HashMap<String, Boolean> playerInResidence = new HashMap<String, Boolean>();
 	public static HashMap<String, String> playerWasIn = new HashMap<String, String>();
 	public static HashMap<String, String> playerWasInResidence = new HashMap<>();
-	private static List<EntityType> entityBreak = Arrays.asList(EntityType.BOAT, EntityType.ITEM_FRAME, EntityType.ARMOR_STAND, EntityType.MINECART, EntityType.MINECART_CHEST, EntityType.MINECART_COMMAND, EntityType.MINECART_FURNACE, EntityType.MINECART_HOPPER, EntityType.MINECART_TNT);
-	private static List<Material> interactiveBlocks = Arrays.asList(Material.CHEST, Material.BLAST_FURNACE, Material.ENDER_CHEST, Material.TRAPPED_CHEST, Material.FURNACE, Material.GRINDSTONE, Material.ENCHANTING_TABLE, Material.JUKEBOX, Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL, Material.SHULKER_BOX, Material.BLACK_BED, Material.BLUE_BED, Material.BROWN_BED, Material.CYAN_BED, Material.GRAY_BED, Material.GREEN_BED, Material.LIGHT_BLUE_BED, Material.LIGHT_GRAY_BED, Material.LIME_BED, Material.MAGENTA_BED, Material.ORANGE_BED, Material.PINK_BED, Material.PURPLE_BED, Material.RED_BED, Material.WHITE_BED, Material.YELLOW_BED, Material.LOOM, Material.COMPOSTER, Material.BARREL, Material.SMOKER, Material.CARTOGRAPHY_TABLE, Material.CRAFTING_TABLE, Material.FLETCHING_TABLE, Material.SMITHING_TABLE, Material.BELL, Material.LODESTONE);
-	private static List<Material> items = Arrays.asList(Material.WATER_BUCKET, Material.LAVA_BUCKET, Material.ACACIA_SIGN, Material.ACACIA_WALL_SIGN, Material.BIRCH_SIGN, Material.BIRCH_WALL_SIGN, Material.CRIMSON_SIGN, Material.CRIMSON_WALL_SIGN, Material.DARK_OAK_SIGN, Material.DARK_OAK_WALL_SIGN, Material.JUNGLE_SIGN, Material.JUNGLE_WALL_SIGN, Material.OAK_SIGN, Material.OAK_WALL_SIGN, Material.SPRUCE_SIGN, Material.SPRUCE_WALL_SIGN, Material.WARPED_SIGN, Material.WARPED_WALL_SIGN, Material.ITEM_FRAME, Material.ARMOR_STAND);
-	private static List<Material> physicalBlocks = Arrays.asList(Material.ACACIA_BUTTON, Material.BIRCH_BUTTON, Material.CRIMSON_BUTTON, Material.DARK_OAK_BUTTON, Material.JUNGLE_BUTTON, Material.OAK_BUTTON, Material.POLISHED_BLACKSTONE_BUTTON, Material.SPRUCE_BUTTON, Material.STONE_BUTTON, Material.WARPED_BUTTON, Material.ACACIA_PRESSURE_PLATE, Material.BIRCH_PRESSURE_PLATE, Material.CRIMSON_PRESSURE_PLATE, Material.DARK_OAK_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.JUNGLE_PRESSURE_PLATE, Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.OAK_PRESSURE_PLATE, Material.POLISHED_BLACKSTONE_PRESSURE_PLATE, Material.SPRUCE_PRESSURE_PLATE, Material.STONE_PRESSURE_PLATE, Material.WARPED_PRESSURE_PLATE, Material.LEVER, Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR, Material.DARK_OAK_TRAPDOOR, Material.JUNGLE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.WARPED_TRAPDOOR);
+	private static final List<EntityType> entityBreak = Arrays.asList(
+			EntityType.BOAT, EntityType.ITEM_FRAME, EntityType.ARMOR_STAND, EntityType.MINECART, 
+			EntityType.MINECART_CHEST, EntityType.MINECART_COMMAND, EntityType.MINECART_FURNACE, 
+			EntityType.MINECART_HOPPER, EntityType.MINECART_TNT);
+	private static final List<Material> interactiveBlocks = Arrays.asList(
+			Material.DISPENSER, Material.DROPPER, Material.CHEST, Material.BLAST_FURNACE, 
+			Material.ENDER_CHEST, Material.TRAPPED_CHEST, Material.FURNACE, Material.GRINDSTONE, 
+			Material.ENCHANTING_TABLE, Material.JUKEBOX, Material.ANVIL, Material.CHIPPED_ANVIL, 
+			Material.DAMAGED_ANVIL, Material.SHULKER_BOX, Material.BLACK_BED, Material.BLUE_BED, 
+			Material.BROWN_BED, Material.CYAN_BED, Material.GRAY_BED, Material.GREEN_BED, 
+			Material.LIGHT_BLUE_BED, Material.LIGHT_GRAY_BED, Material.LIME_BED, Material.MAGENTA_BED, 
+			Material.ORANGE_BED, Material.PINK_BED, Material.PURPLE_BED, Material.RED_BED, Material.WHITE_BED, 
+			Material.YELLOW_BED, Material.LOOM, Material.COMPOSTER, Material.BARREL, Material.SMOKER, 
+			Material.CARTOGRAPHY_TABLE, Material.CRAFTING_TABLE, Material.FLETCHING_TABLE, Material.SMITHING_TABLE, 
+			Material.BELL, Material.LODESTONE);
+	private static final List<Material> items = Arrays.asList(
+			Material.WATER_BUCKET, Material.LAVA_BUCKET, Material.ACACIA_SIGN, Material.ACACIA_WALL_SIGN, 
+			Material.BIRCH_SIGN, Material.BIRCH_WALL_SIGN, Material.CRIMSON_SIGN, Material.CRIMSON_WALL_SIGN, 
+			Material.DARK_OAK_SIGN, Material.DARK_OAK_WALL_SIGN, Material.JUNGLE_SIGN, Material.JUNGLE_WALL_SIGN, 
+			Material.OAK_SIGN, Material.OAK_WALL_SIGN, Material.SPRUCE_SIGN, Material.SPRUCE_WALL_SIGN, Material.WARPED_SIGN, 
+			Material.WARPED_WALL_SIGN, Material.ITEM_FRAME, Material.ARMOR_STAND);
+	private static final List<Material> physicalBlocks = Arrays.asList(
+			Material.ACACIA_FENCE_GATE, Material.BIRCH_FENCE_GATE, Material.CRIMSON_FENCE_GATE, Material.DARK_OAK_FENCE_GATE,
+			Material.JUNGLE_FENCE_GATE, Material.OAK_FENCE_GATE, Material.SPRUCE_FENCE_GATE, Material.WARPED_FENCE_GATE,    
+			Material.ACACIA_DOOR, Material.BIRCH_DOOR, Material.CRIMSON_DOOR, Material.DARK_OAK_DOOR, Material.IRON_DOOR, 
+			Material.JUNGLE_DOOR, Material.OAK_DOOR, Material.SPRUCE_DOOR, Material.WARPED_DOOR, Material.ACACIA_BUTTON, 
+			Material.BIRCH_BUTTON, Material.CRIMSON_BUTTON, Material.DARK_OAK_BUTTON, Material.JUNGLE_BUTTON, 
+			Material.OAK_BUTTON, Material.POLISHED_BLACKSTONE_BUTTON, Material.SPRUCE_BUTTON, Material.STONE_BUTTON, 
+			Material.WARPED_BUTTON, Material.ACACIA_PRESSURE_PLATE, Material.BIRCH_PRESSURE_PLATE, Material.CRIMSON_PRESSURE_PLATE, 
+			Material.DARK_OAK_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.JUNGLE_PRESSURE_PLATE, 
+			Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.OAK_PRESSURE_PLATE, Material.POLISHED_BLACKSTONE_PRESSURE_PLATE, 
+			Material.SPRUCE_PRESSURE_PLATE, Material.STONE_PRESSURE_PLATE, Material.WARPED_PRESSURE_PLATE, Material.LEVER,
+			Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR, Material.DARK_OAK_TRAPDOOR, 
+			Material.JUNGLE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.WARPED_TRAPDOOR);
 	public static HashMap<String, Boolean> promptedUser = new HashMap<>();
 	public static HashMap<String, Residence> promptedUserResidence = new HashMap<>();
 	public static HashMap<String, Boolean> userInAreaSelection = new HashMap<>();
@@ -582,12 +612,8 @@ public class ResListeners implements Listener{
 		LuckPerms api = Main.getLP();
 		User user = Methods.getUserFromOfflinePlayer(player.getUniqueId());
 		api.getUserManager().saveUser(user);
-		if(Commands.block1.containsKey(player)) {
-			Commands.block1.remove(player);
-		}
-		if(Commands.block2.containsKey(player)) {
-			Commands.block2.remove(player);
-		}
+		Commands.block1.remove(player);
+		Commands.block2.remove(player);
 		Methods.ListenersRemoveGlowingBlock(player, 1);
 		Methods.ListenersRemoveGlowingBlock(player, 2);
 	}
@@ -627,11 +653,11 @@ public class ResListeners implements Listener{
 						}
 						return;
 					}
-					if(message.contains("<owner>")){
-						message = message.replace("<owner>", owner+"'s");
+					if(message.contains("%owner%")){
+						message = message.replace("%owner%", owner+"'s");
 					}
-					if(message.contains("<player>")) {
-						message = message.replace("<player>", player.getName());
+					if(message.contains("%player%")) {
+						message = message.replace("%player%", player.getName());
 					}
 					boolean notifyOther = r.getNotifyOther();
 					if(Boolean.valueOf(notifyOther) == true) {
@@ -664,11 +690,11 @@ public class ResListeners implements Listener{
 					}
 					return;
 				}
-				if(message.contains("<owner>")){
-					message = message.replace("<owner>", owner+"'s");
+				if(message.contains("%owner%")){
+					message = message.replace("%owner%", owner+"'s");
 				}
-				if(message.contains("<player>")) {
-					message = message.replace("<player>", player.getName());
+				if(message.contains("%player%")) {
+					message = message.replace("%player%", player.getName());
 				}
 				boolean notifyOther = r.getNotifyOther();
 				if(Boolean.valueOf(notifyOther) == true) {
@@ -764,11 +790,11 @@ public class ResListeners implements Listener{
 									}
 									return;
 								}
-								if(message.contains("<owner>")){
-									message = message.replace("<owner>", owner+"'s");
+								if(message.contains("%owner%")){
+									message = message.replace("%owner%", owner+"'s");
 								}
-								if(message.contains("<player>")) {
-									message = message.replace("<player>", player.getName());
+								if(message.contains("%player%")) {
+									message = message.replace("%player%", player.getName());
 								}
 								boolean notifyOther = resi.getNotifyOther();
 								if(notifyOther == true) {
@@ -808,11 +834,11 @@ public class ResListeners implements Listener{
 						}
 						return;
 					}
-					if(message.contains("<owner>")){
-						message = message.replace("<owner>", owner+"'s");
+					if(message.contains("%owner%")){
+						message = message.replace("%owner%", owner+"'s");
 					}
-					if(message.contains("<player>")) {
-						message = message.replace("<player>", player.getName());
+					if(message.contains("%player%")) {
+						message = message.replace("%player%", player.getName());
 					}
 					boolean notifyOther = resi.getNotifyOther();
 					if(notifyOther == true) {
@@ -872,11 +898,11 @@ public class ResListeners implements Listener{
 								}
 								return;
 							}
-							if(message.contains("<owner>")){
-								message = message.replace("<owner>", owner+"'s");
+							if(message.contains("%owner%")){
+								message = message.replace("%owner%", owner+"'s");
 							}
-							if(message.contains("<player>")) {
-								message = message.replace("<player>", player.getName());
+							if(message.contains("%player%")) {
+								message = message.replace("%player%", player.getName());
 							}
 							boolean notifyOther = resi.getNotifyOther();
 							if(Boolean.valueOf(notifyOther) == true) {
@@ -916,11 +942,11 @@ public class ResListeners implements Listener{
 					}
 					return;
 				}
-				if(message.contains("<owner>")){
-					message = message.replace("<owner>", owner+"'s");
+				if(message.contains("%owner%")){
+					message = message.replace("%owner%", owner+"'s");
 				}
-				if(message.contains("<player>")) {
-					message = message.replace("<player>", player.getName());
+				if(message.contains("%player%")) {
+					message = message.replace("%player%", player.getName());
 				}
 				boolean notifyOther = resi.getNotifyOther();
 				if(Boolean.valueOf(notifyOther) == true) {
@@ -2240,12 +2266,8 @@ public class ResListeners implements Listener{
 				event.setMessage(null);
 				userInAreaSelection.put(player.getName(), false);
 				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&eResidence area creation has been cancelled"));
-				if(Commands.block1.containsKey(player)) {
-					Commands.block1.remove(player);	
-				}
-				if(Commands.block2.containsKey(player)) {
-					Commands.block2.remove(player);	
-				}
+				Commands.block1.remove(player);
+				Commands.block2.remove(player);
 				if(Listeners.task1 != null) {
 					Listeners.task1.cancel();
 				}

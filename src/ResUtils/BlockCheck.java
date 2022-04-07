@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import ResClass.Residence;
 import ResMain.Main;
-
+// Used in block saving/replacing (not used in final plugin)
 public class BlockCheck extends BukkitRunnable{
 	
 	private final List<Block> blocks;

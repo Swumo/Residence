@@ -17,7 +17,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import ResClass.Residence;
 import ResMain.Main;
-
+//Used in block saving/replacing (not used in final plugin)
 public class BlockSaving {
 
 	
@@ -31,9 +31,9 @@ public class BlockSaving {
 			content.clear();
 			for(Block b : blocks) {
 				String world = b.getWorld().getName();
-				int x = (int) b.getX();
-				int y = (int) b.getY();
-				int z = (int) b.getZ();
+				int x = b.getX();
+				int y = b.getY();
+				int z = b.getZ();
 				Material mat = b.getType();
 				String toSave = world + "/" + x + "/" + y + "/" + z + "/" + mat;
 				content.add(toSave);
@@ -51,9 +51,9 @@ public class BlockSaving {
         List<String> content = new ArrayList<>();
         for(Block b : blocks) {
 			String world = b.getWorld().getName();
-			int x = (int) b.getX();
-			int y = (int) b.getY();
-			int z = (int) b.getZ();
+			int x = b.getX();
+			int y = b.getY();
+			int z = b.getZ();
 			Material mat = b.getType();
 			String toSave = world + "/" + x + "/" + y + "/" + z + "/" + mat;
 			content.add(toSave);
@@ -72,9 +72,9 @@ public class BlockSaving {
 	public static int checkBlockExists(Player player, Residence res, Block block) throws NullPointerException {
 		YamlConfiguration c = YamlConfiguration.loadConfiguration(new File("plugins/Residence/data", player.getUniqueId()+".yml"));
 		List<String> content = (List<String>) c.getList("Blocks."+res.getName(), new ArrayList<String>());
-		int x = (int) block.getX();
-		int y = (int) block.getY();
-		int z = (int) block.getZ();
+		int x = block.getX();
+		int y = block.getY();
+		int z = block.getZ();
 		for(int i = 0; i < content.size(); i++) {
 			String a = content.get(i);
 			if(!a.contains(x+"/"+y+"/"+z)) continue;
@@ -114,11 +114,8 @@ public class BlockSaving {
     
   	public static boolean checkIfLoadExists(Player player, Residence res) throws NullPointerException {
 		YamlConfiguration c = YamlConfiguration.loadConfiguration(new File("plugins/Residence/data", player.getUniqueId()+".yml"));
-		if(c.get("Blocks."+res.getName()) != null) {
-			return true;
-		}
-		return false;
-    }
+		return c.get("Blocks." + res.getName()) != null;
+	}
   	
   	
   	public static void removeEntry(UUID player, String resName) {

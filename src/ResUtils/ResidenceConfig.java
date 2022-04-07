@@ -11,6 +11,7 @@ public class ResidenceConfig {
 		plugin = p;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void loadConfig() {
 		
 		FileConfiguration config = plugin.getConfig();
@@ -18,8 +19,8 @@ public class ResidenceConfig {
 		config.options().header("Author: Swumo");
 		
 		config.addDefault("pluginPrefix", "&3Residence &6| ");
-		config.addDefault("residenceGreetingMessage", "&eYou have entered <owner> residence.");
-		config.addDefault("residenceFarewellMessage", "&eYou have left <owner> residence.");
+		config.addDefault("residenceGreetingMessage", "&eYou have entered %owner% residence.");
+		config.addDefault("residenceFarewellMessage", "&eYou have left %owner% residence.");
 		config.addDefault("particleColour", "White");
 		config.addDefault("playerDefaultAreaSize", 4000);
 		config.addDefault("maxResidences", 5);

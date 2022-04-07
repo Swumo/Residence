@@ -29,12 +29,6 @@ public class ResidenceMainMenu {
 	
 	public static HashMap<UUID, Residence> selectedResidence = new HashMap<>();
 	
-//	1 	2 	3 	4 	5 	6 	7 	8 	9
-//	10  11	12	13	14	15	16	17	18
-//	19	20	21	22	23	24	25	26	27
-//	28	29	30	31	32	33	34	35	36
-//	37	38	39	40	41	42	43	44	45
-// 	46	47	48	49	50	51	52	53	54
 	
 	public static void updateInventory(final Player player, Residence res) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
@@ -56,7 +50,7 @@ public class ResidenceMainMenu {
     				Utils.createPlayerHead(inv, player, 1, 14, "&6&lResidence Info:", "&eName: &7"+res.getName(), "&aArea: &7"+res.getArea().toStringMenu(), "&bResidents: &cNone");
     			}
     			else {
-    				String toSave = new String();
+    				String toSave = "";
     				List<UUID> residents = res.getResidents();
     				if(residents.size() > 1) {
     					for(UUID id : residents) {
@@ -70,7 +64,6 @@ public class ResidenceMainMenu {
     				Utils.createPlayerHead(inv, player, 1, 14, "&6&lResidence Info:", "&eName: &7"+res.getName(), "&aArea: &7"+res.getArea().toStringMenu(), "&bResidents: &7" + toSave);
     			}	
     		}
-    		// 30 34 37
     		Utils.createItem(inv, Material.REDSTONE, 1, 30, "&e&lEdit Residence", "&7&oEdit your residence");
     		Utils.createItem(inv, Material.OAK_SIGN, 1, 32, "&b&lTeleport to Residence", "&7&oTeleport to Residence");
     		Utils.createItem(inv, Material.TNT, 1, 34, "&c&lDelete Residence", "&7&oDelete your residence");
@@ -100,7 +93,7 @@ public class ResidenceMainMenu {
 				Utils.createPlayerHead(inv, player, 1, 14, "&6&lResidence Info:", "&eName: &7"+res.getName(), "&aArea: &7"+res.getArea().toStringMenu(), "&bResidents: &cNone");
 			}
 			else {
-				String toSave = new String();
+				String toSave = "";
 				List<UUID> residents = res.getResidents();
 				if(residents.size() > 1) {
 					for(UUID id : residents) {
@@ -114,7 +107,7 @@ public class ResidenceMainMenu {
 				Utils.createPlayerHead(inv, player, 1, 14, "&6&lResidence Info:", "&eName: &7"+res.getName(), "&aArea: &7"+res.getArea().toStringMenu(), "&bResidents: &7" + toSave);
 			}	
 		}
-		// 30 34 37
+		
 		Utils.createItem(inv, Material.REDSTONE, 1, 30, "&e&lEdit Residence", "&7&oEdit your residence");
 		Utils.createItem(inv, Material.OAK_SIGN, 1, 32, "&b&lTeleport to Residence", "&7&oTeleport to Residence");
 		Utils.createItem(inv, Material.TNT, 1, 34, "&c&lDelete Residence", "&7&oDelete your residence");

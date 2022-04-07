@@ -25,14 +25,6 @@ public class ResidencePlayerRemoveMenu {
 		inv = Bukkit.createInventory(null, rows);
 	}
 	
-	
-//	1 	2 	3 	4 	5 	6 	7 	8 	9
-//	10  11	12	13	14	15	16	17	18
-//	19	20	21	22	23	24	25	26	27
-//	28	29	30	31	32	33	34	35	36
-//	37	38	39	40	41	42	43	44	45
-// 	46	47	48	49	50	51	52	53	54
-	
 	public static void updateInventory(final Player player, Residence res) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
     	if(inv != null) {
@@ -166,7 +158,6 @@ public class ResidencePlayerRemoveMenu {
 		}
 		else {
 			Residence res = ResidenceMainMenu.selectedResidence.get(player.getUniqueId());
-			System.out.println(res.getName());
 			String name = clicked.getItemMeta().getDisplayName();
 			name = ChatColor.stripColor(name);
 			Player playerToRemove = Bukkit.getPlayer(name);
