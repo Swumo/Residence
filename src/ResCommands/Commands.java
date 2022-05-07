@@ -48,10 +48,11 @@ public class Commands implements TabExecutor{
 	public static HashMap<Player, Boolean> block2RightClicked = new HashMap<Player, Boolean>();
 	public static HashMap<Player, Block> selectedBlock = new HashMap<Player, Block>();
 	public static HashMap<UUID, HashMap<Residence, BukkitTask>> residenceAreaShow = new HashMap<>();
-	public static BukkitTask testTask;
 	private static CustomFile messages = Main.getMessagesFile();
 	
 	public static String pluginPrefix = Main.getInstance().getConfig().getString("pluginPrefix");
+	private static int previousMaxArea = 0;
+	private static int previousMaxRes = 0;
 	
 	public static ItemStack giveWand(Player player) {
 		ItemStack item = new ItemStack(Material.STICK);
@@ -70,6 +71,8 @@ public class Commands implements TabExecutor{
 	}
 	
 	private void resetVariables() {
+		previousMaxArea = Main.defaultAreaSize;
+		previousMaxRes = Main.maxResidences;
 		pluginPrefix = Main.getInstance().getConfig().getString("pluginPrefix");
 		Main.greetingMessage = Main.getInstance().getConfig().getString("residenceGreetingMessage");
 		Main.farewellMessage = Main.getInstance().getConfig().getString("residenceFarewellMessage");
@@ -77,6 +80,30 @@ public class Commands implements TabExecutor{
 		Main.defaultAreaSize = Main.getInstance().getConfig().getInt("playerDefaultAreaSize");
 		Main.maxResidences = Main.getInstance().getConfig().getInt("maxResidences");
 		Main.protectOnlyWhileOffline = Main.getInstance().getConfig().getBoolean("protectOnlyWhileOffline");
+	}
+	
+	private boolean updatePlayers() {
+		if(Main.defaultAreaSize > previousMaxArea || Main.defaultAreaSize < previousMaxArea) {
+			for(OfflinePlayer player : Bukkit.getServer().getOfflinePlayers()) {
+				Methods.setPlayerDefaultAreaSize(player.getUniqueId(), Main.defaultAreaSize);
+			}
+			for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+				Methods.setPlayerDefaultAreaSize(player, Main.defaultAreaSize);
+			}
+			previousMaxArea = Main.defaultAreaSize;
+			return true;
+		}
+		if(Main.maxResidences > previousMaxRes || Main.maxResidences < previousMaxRes) {
+			for(OfflinePlayer player : Bukkit.getServer().getOfflinePlayers()) {
+				Methods.setPlayerMaxResidenceCount(player.getUniqueId(), Main.maxResidences);
+			}
+			for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+				Methods.setPlayerMaxResidenceCount(player, Main.maxResidences);
+			}
+			previousMaxRes = Main.maxResidences;
+			return true;
+		}
+		return false;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -145,6 +172,16 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal("&e/res setname <newname> &7- " + messages.getConfigField("Help.Setname")));
 			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- " + messages.getConfigField("Help.Showarea")));
 			player.sendMessage(Utils.normal("&7&m-----------------------------------------------"));
+			return true;
+		}
+		
+		if(args[0].equalsIgnoreCase("updateplayers")) {
+			boolean value = updatePlayers();
+			if(value == true) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersTrue")));
+			} else {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersFalse")));
+			}
 			return true;
 		}
 		
@@ -859,6 +896,7 @@ public class Commands implements TabExecutor{
 					firstArgs.add("list");
 					firstArgs.add("reload");
 					firstArgs.add("oset");
+					firstArgs.add("updateplayers");
 				}
 				final List<String> completions = new ArrayList<>();
 		        StringUtil.copyPartialMatches(args[0], firstArgs, completions);
@@ -886,6 +924,7 @@ public class Commands implements TabExecutor{
 					firstArgs.add("list");
 					firstArgs.add("reload");
 					firstArgs.add("oset");
+					firstArgs.add("updateplayers");
 				}
 		        final List<String> completions = new ArrayList<>();
 		        StringUtil.copyPartialMatches(args[0], firstArgs, completions);

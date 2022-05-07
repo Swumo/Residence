@@ -98,6 +98,8 @@ public class Methods {
 		messages.getConfigField("Help.Setname", "&bSet a new name for your Residence");
 		messages.getConfigField("Help.Showarea", "&bStart/Stop showing the claimed area of your specified Residence to other players with particles");
 		// Command messages
+		messages.getConfigField("Commands.UpdatePlayersTrue", "&aAll players have been updated!");
+		messages.getConfigField("Commands.UpdatePlayersFalse", "&cNo players have been updated!");
 		messages.getConfigField("Commands.Reload", "&aConfig reloaded!");
 		messages.getConfigField("Commands.NoResidences", "&cYou do not have any Residences!");
 		messages.getConfigField("Commands.StartOrStop", "&cPlease specify either &estart &cor &estop&c!");
@@ -500,6 +502,28 @@ public class Methods {
 		api.getUserManager().saveUser(user);
 	}
 	
+	/**
+	 * Set the max amount of claimable blocks for a player
+	 * @param player - UUID
+	 * @param amount - Integer
+	 */
+	public static void setPlayerDefaultAreaSize(UUID player, int amount) {
+		LuckPerms api = Main.getLP();
+		User user = getUserFromOfflinePlayer(player);
+		List<Node> nodes = (List<Node>) user.getNodes();
+		for(int i = 0; i < nodes.size(); i++) {
+			Node node = nodes.get(i);
+			if(node.getKey().contains("meta.residence\\.defaultarea")) {
+				user.data().remove(node);
+				api.getUserManager().saveUser(user);
+				break;
+			}
+		}
+		MetaNode defAreaPerm = MetaNode.builder("Residence.defaultarea", String.valueOf(amount)).build();
+		user.data().add(defAreaPerm);
+		api.getUserManager().saveUser(user);
+	}
+	
 	
 	/*
 	 * 
@@ -542,6 +566,29 @@ public class Methods {
 	public static void setPlayerMaxResidenceCount(Player player, int amount) {
 		LuckPerms api = Main.getLP();
 		User user = api.getUserManager().getUser(player.getName());
+		List<Node> nodes = (List<Node>) user.getNodes();
+		for(int i = 0; i < nodes.size(); i++) {
+			Node node = nodes.get(i);
+			if(node.getKey().contains("meta.residence\\.maxresidences")) {
+				user.data().remove(node);
+				api.getUserManager().saveUser(user);
+				break;
+			}
+		}
+		MetaNode maxResPerm = MetaNode.builder("Residence.maxResidences", String.valueOf(amount)).build();
+		user.data().add(maxResPerm);
+		api.getUserManager().saveUser(user);
+	}
+	
+	
+	/**
+	 * Set the max amount of residences a player can have
+	 * @param player - UUID
+	 * @param amount - Integer
+	 */
+	public static void setPlayerMaxResidenceCount(UUID player, int amount) {
+		LuckPerms api = Main.getLP();
+		User user = getUserFromOfflinePlayer(player);
 		List<Node> nodes = (List<Node>) user.getNodes();
 		for(int i = 0; i < nodes.size(); i++) {
 			Node node = nodes.get(i);
