@@ -201,71 +201,8 @@ public class Commands implements TabExecutor{
 			ResidencePreMainMenu.openInv(player);
 			return true;
 		}
-//		
-//		
-//		// Point showing/hiding
-//		
-//		if(args[0].equalsIgnoreCase("points")) {
-//			if(!block1.containsKey(player) && !block2.containsKey(player)) {
-//				player.sendMessage(Utils.normal(pluginPrefix+"&cYou must have at least 1 point selected"));
-//				return false;
-//			}
-//			boolean areHidden = ResListeners.userHidingPoints.get(player.getName());
-//			EntityHider entityHider = Main.getHider();
-//			List<Player> otherPlayers = new ArrayList<Player>(Bukkit.getOnlinePlayers());
-//			otherPlayers.remove(player);
-//			if(args.length < 2) {
-//				player.sendMessage(Utils.normal(pluginPrefix+"&cYou must specify either &eShow &cor &eHide&c!"));
-//				return false;
-//			}
-//			if(args[1].equalsIgnoreCase("show")) {
-//				if(areHidden == false) {
-//					player.sendMessage(Utils.normal(pluginPrefix+"&cYour selection points are already visible!"));
-//					return false;
-//				}
-//				World world = player.getWorld();
-//				List<Entity> entities = world.getEntities();
-//				for(int i = 0; i < entities.size(); i++) {
-//					Entity ent = entities.get(i);
-//					if(Methods.entities.contains(ent.getType())) {
-//						if(ent.getCustomName() == null) continue;
-//						if(ent.getCustomName().equals(player.getName()+"Block1") || ent.getCustomName().equals(player.getName()+"Block2")) {
-//							for(Player p : otherPlayers) {
-//								entityHider.showEntity(p, ent);
-//							}
-//						}	
-//					}
-//				}
-//				ResListeners.userHidingPoints.put(player.getName(), false);
-//				player.sendMessage(Utils.normal(pluginPrefix+"&eYour selection points are now &avisible &eto other players!"));
-//				return true;
-//			}
-//			if(args[1].equalsIgnoreCase("hide")) {
-//				if(areHidden == true) {
-//					player.sendMessage(Utils.normal(pluginPrefix+"&cYour selection points are already hidden!"));
-//					return false;
-//				}
-//				World world = player.getWorld();
-//				List<Entity> entities = world.getEntities();
-//				for(int i = 0; i < entities.size(); i++) {
-//					Entity ent = entities.get(i);
-//					if(Methods.entities.contains(ent.getType())) {
-//						if(ent.getCustomName() == null) continue;
-//						if(ent.getCustomName().equals(player.getName()+"Block1") || ent.getCustomName().equals(player.getName()+"Block2")) {
-//							for(Player p : otherPlayers) {
-//								entityHider.hideEntity(p, ent);
-//							}
-//						}	
-//					}
-//				}
-//				ResListeners.userHidingPoints.put(player.getName(), true);
-//				player.sendMessage(Utils.normal(pluginPrefix+"&eYour selection points are now &chidden &efrom other players!"));
-//				return true;
-//			}
-//			return false;
-//		}
-//		
-//		
+		
+		
 		// Show area
 		
 		if(args[0].equalsIgnoreCase("showarea")) {
