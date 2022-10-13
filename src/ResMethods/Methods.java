@@ -56,11 +56,33 @@ public class Methods {
 	 */
 	public static List<EntityType> entities = Arrays.asList(EntityType.values());
 	
-	/*
-	 * 
-	 * POPULATE MESSAGES.YML
-	 * 
-	 */
+	
+	
+	public static void populateToggles(CustomFile toggles) {
+		toggles.setHeader("Author - Swumo\n"
+				+ "Enable/Disable commands\n"
+				+ "Is command disabled?:");
+		toggles.getConfigField("Managing.Menu", false);
+		toggles.getConfigField("Managing.Create", false);
+		toggles.getConfigField("Managing.Add", false);
+		toggles.getConfigField("Managing.Remove", false);
+		toggles.getConfigField("Managing.Delete", false);
+		toggles.getConfigField("Managing.Delall", false);
+		toggles.getConfigField("Managing.Set", false);
+		toggles.getConfigField("Managing.Sethome", false);
+		toggles.getConfigField("Managing.Oset", false);
+		toggles.getConfigField("Managing.Setname", false);
+		toggles.getConfigField("Other.Wand", false);
+		toggles.getConfigField("Other.List", false);
+		toggles.getConfigField("Other.Forceload", false);
+		toggles.getConfigField("Other.Home", false);
+		toggles.getConfigField("Other.Maxarea", false);
+		toggles.getConfigField("Other.Showarea", false);
+		toggles.getConfigField("Other.Updateplayers", false);
+		toggles.getConfigField("Other.Maxres", false);
+	}
+	
+	
 	/**
 	 * Populate the messages.yml file
 	 * @param messages
@@ -93,11 +115,14 @@ public class Methods {
 		messages.getConfigField("Help.Set", "&bSet greeting/farewell message to <message> | none | default");
 		messages.getConfigField("Help.Sethome", "&bSet your Residence home");
 		messages.getConfigField("Help.Home", "&bTeleport to your Residence home");
-		messages.getConfigField("Help.Oset", "&bSet max claim area in blocks &c[Admin Only]");
+		messages.getConfigField("Help.Oset", "&bSet new max residence count for <player> | Set new max area in blocks for <player> &c[Admin Only]");
 		messages.getConfigField("Help.Maxarea", "&bCheck your max amount of claimable blocks");
 		messages.getConfigField("Help.Setname", "&bSet a new name for your Residence");
 		messages.getConfigField("Help.Showarea", "&bStart/Stop showing the claimed area of your specified Residence to other players with particles");
+		messages.getConfigField("Help.UpdatePlayers", "&bUpdate all player max residence count and default area size from config &c[Admin Only]");
+		messages.getConfigField("Help.Reload", "&bReloads the plugin &c[Admin Only]");
 		// Command messages
+		messages.getConfigField("Commands.Disabled", "&cThis command is disabled!");
 		messages.getConfigField("Commands.UpdatePlayersTrue", "&aAll players have been updated!");
 		messages.getConfigField("Commands.UpdatePlayersFalse", "&cNo players have been updated!");
 		messages.getConfigField("Commands.Reload", "&aConfig reloaded!");
@@ -148,101 +173,6 @@ public class Methods {
 		messages.getConfigField("Commands.MaxResidences", "&aYour maximum amount of Residences is &e%amount%&a!");
 	}
 	
-	
-//	/**
-//	 * Populate the menuMessages.yml file
-//	 * @param messages
-//	 * @apiNote Should not be used on its own, as it could break some things!
-//	 */
-//	public static void populateMenuMessages(CustomFile messages) {
-//		// General
-//		messages.getConfigField("General.Back", "&cBack");
-//		messages.getConfigField("General.Back.Description", "&7&oGo back to main menu");
-//		// Edit Menu
-//		messages.getConfigField("Edit.Name", "&6&lResidence &0Edit Menu");
-//		messages.getConfigField("Edit.AddPlayer", "&a&lAdd Player");
-//		messages.getConfigField("Edit.AddPlayer.Description", "&7&oAdd a player to your Residence");
-//		messages.getConfigField("Edit.RemovePlayer", "&c&lRemove Player");
-//		messages.getConfigField("Edit.RemovePlayer.Description", "&7&oRemove a player from your Residence");
-//		messages.getConfigField("Edit.EditGuestRules", "&e&lEdit Guest Rules");
-//		messages.getConfigField("Edit.EditGuestRules.Description", "&7&oEdit guest rules");
-//		messages.getConfigField("Edit.ChangeAreaSize", "&b&lChange area size");
-//		messages.getConfigField("Edit.ChangeAreaSize.Description", "&7&oChange your Residence area size");
-//		messages.getConfigField("Edit.EditResidentPermissions", "&e&lEdit Resident Permissions");
-//		messages.getConfigField("Edit.EditResidentPermissions.Description", "&7&oEdit per Resident permissions");
-//		messages.getConfigField("Edit.Settings", "&f&lSettings");
-//		messages.getConfigField("Edit.Settings.Description", "&7&oEdit settings");
-//		messages.getConfigField("Edit.ChangeParticleColour", "&e&lChange particle colour when selecting area");
-//		messages.getConfigField("Edit.ChangeParticleColour.Description", "&7&oChange particle colour when selecting area");
-//		messages.getConfigField("Edit.GeneralRules", "&e&lEdit General Rules");
-//		messages.getConfigField("Edit.GeneralRules.Description", "&7&oEdit general rules");
-//		// General Rules Menu
-//		messages.getConfigField("GenRule.Name", "&6&lResidence &0Gen. Rule Menu");
-//		messages.getConfigField("GenRule.Menu", "&bOpen Residence Menu");
-//		messages.getConfigField("Help.Wand", "&bGet/Give Residence Claim Wand &c[Admin Only]");
-//		messages.getConfigField("Help.Create", "&bCreate your Residence");
-//		messages.getConfigField("Help.Add", "&bAdd <player> to your Residence");
-//		messages.getConfigField("Help.Remove", "&bRemove <player> from your Residence");
-//		messages.getConfigField("Help.Delete", "&bDelete your Residence");
-//		messages.getConfigField("Help.Delall", "&bDelete &cALL &bResidences &c[Admin Only]");
-//		messages.getConfigField("Help.List", "&bList all Residences &c[Admin Only]");
-//		messages.getConfigField("Help.Forceload", "&bForce load every Residence &c[Admin Only]");
-//		messages.getConfigField("Help.Set", "&bSet greeting/farewell message to <message> | none | default");
-//		messages.getConfigField("Help.Sethome", "&bSet your Residence home");
-//		messages.getConfigField("Help.Home", "&bTeleport to your Residence home");
-//		messages.getConfigField("Help.Oset", "&bSet max claim area in blocks &c[Admin Only]");
-//		messages.getConfigField("Help.Maxarea", "&bCheck your max amount of claimable blocks");
-//		messages.getConfigField("Help.Setname", "&bSet a new name for your Residence");
-//		messages.getConfigField("Help.Showarea", "&bStart/Stop showing the claimed area of your specified Residence to other players with particles");
-//		// Command messages
-//		messages.getConfigField("Commands.Reload", "&aConfig reloaded!");
-//		messages.getConfigField("Commands.NoResidences", "&cYou do not have any Residences!");
-//		messages.getConfigField("Commands.StartOrStop", "&cPlease specify either &estart &cor &estop&c!");
-//		messages.getConfigField("Commands.Name", "&cPlease specify a Residence name!");
-//		messages.getConfigField("Commands.Exists", "&cResidence does not exist!");
-//		messages.getConfigField("Commands.ShowingArea", "&cYou are already showing this Residence area to other players!");
-//		messages.getConfigField("Commands.NowShowing", "&aYou are now showing your Residence area to other players!");
-//		messages.getConfigField("Commands.NotShowing", "&aYou are not showing this Residence's area!");
-//		messages.getConfigField("Commands.StoppedShowing", "&aYou have stopped showing your Residence area to other players!");
-//		messages.getConfigField("Commands.NoPerm", "&cYou cannot run this command!");
-//		messages.getConfigField("Commands.WandGiven", "&eResidence Claim Wand was given to you!");
-//		messages.getConfigField("Commands.MustStand", "&cYou must stand in your Residence!");
-//		messages.getConfigField("Commands.HomeSet", "&aResidence home set!");
-//		messages.getConfigField("Commands.DuplicateNames", "&cYou cannot have duplicate Residence names!");
-//		messages.getConfigField("Commands.NameSet", "&aResidence name set!");
-//		messages.getConfigField("Commands.NoPlayer", "&cPlease specify a player!");
-//		messages.getConfigField("Commands.OwnerAdd", "&cYou cannot add yourself to your own Residence!");
-//		messages.getConfigField("Commands.OfflinePlayer", "&cPlayer is not online!");
-//		messages.getConfigField("Commands.AddedPlayer", "&e%name% &ahas been added to your Residence!");
-//		messages.getConfigField("Commands.AddedTo", "&aYou have been added to &e%name%'s Residence!");
-//		messages.getConfigField("Commands.OwnerRemove", "&cYou cannot remove yourself from your own Residence!");
-//		messages.getConfigField("Commands.RemovedPlayer", "&e%name% &ahas been removed from your Residence!");
-//		messages.getConfigField("Commands.RemovedFrom", "&aYou have been removed from &e%name%'s Residence!");
-//		messages.getConfigField("Commands.MaxResidences", "&cYou cannot have more than &e%amount% &cResidences!");
-//		messages.getConfigField("Commands.NoArea", "&cYou do not have an area selected!");
-//		messages.getConfigField("Commands.AreaOverMax", "&cYou cannot have an area bigger than %size% blocks! (Currently: %currently%)");
-//		messages.getConfigField("Commands.SelectedAnother", "&cYour selected area claims another Residence! Please select a new area!");
-//		messages.getConfigField("Commands.Created", "&aResidence created!");
-//		messages.getConfigField("Commands.ConfirmDelete", "&eAre you sure you want to delete your Residence? Type &aYes &eto delete it or &cNo &eto cancel");
-//		messages.getConfigField("Commands.AdminDeletedOne", "&eYour Residence has been deleted by an Admin!");
-//		messages.getConfigField("Commands.AdminDeletedMore", "&eYour Residences have been deleted by an Admin!");
-//		messages.getConfigField("Commands.AllDeleted", "&aAll Residences successfully deleted!");
-//		messages.getConfigField("Commands.NoResidencesList", "&cThere are no Residences.");
-//		messages.getConfigField("Commands.ForceLoad", "&aResidences successfully force loaded!");
-//		messages.getConfigField("Commands.MessageOrNone", "&cPlease specify a message, &enone &cto remove it or &ereset &cto reset your message!");
-//		messages.getConfigField("Commands.GreetingSet", "&aYour new Residence greeting message has been set!");
-//		messages.getConfigField("Commands.FarewellSet", "&aYour new Residence farewell message has been set!");
-//		messages.getConfigField("Commands.GreetingOrFarewell", "&cPlease specify either &egreeting &cor &efarewell&c!");
-//		messages.getConfigField("Commands.NewArea", "&cPlease specify a new area in blocks!");
-//		messages.getConfigField("Commands.AdminSetAreaOther", "&aAn Admin has set your new max area size to &e%size%&a!");
-//		messages.getConfigField("Commands.AdminSetAreaOwn", "&aYou have set &e%name%'s &anew max area size to &e%size%&a!");
-//		messages.getConfigField("Commands.NoNumber", "&cPlease specify a number!");
-//		messages.getConfigField("Commands.AdminSetResidenceOther", "&aAn Admin has set your new max Residence count to &e%count%&a!");
-//		messages.getConfigField("Commands.AdminSetResidenceOwn", "&aYou have set &e%name%'s &anew max Residence count to &e%count%&a!");
-//		messages.getConfigField("Commands.MaxClaimBlocks", "&aYour maximum amount of claimable blocks is &e%amount%&a!");
-//		messages.getConfigField("Commands.MaxResidences", "&aYour maximum amount of Residences is &e%amount%&a!");
-//	}
-//	
 	/*
 	 * 
 	 * TELEPORTING PLAYER TO HOME
@@ -961,7 +891,7 @@ public class Methods {
 				}
 			}
 			
-		}.runTaskTimer(Main.getInstance(), 20, 60);
+		}.runTaskTimer(Main.getInstance(), 20, 20);
 	}
 	
 	

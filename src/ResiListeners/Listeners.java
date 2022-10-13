@@ -46,7 +46,6 @@ public class Listeners implements Listener{
 	public static BukkitTask task1;
 	public static BukkitTask task2;
 	
-	
 	@EventHandler
 	public void onWandClick(PlayerInteractEvent event) {
 		Player player = event.getPlayer();

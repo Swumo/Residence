@@ -24,6 +24,8 @@ This project has no relation to the Residence plugin available on Spigot! No cod
 
 - Get notified whenever someone enters your residence!
 
+- Ability to disable specific commands!
+
 - And much more!
 
 ### Commands
@@ -51,19 +53,23 @@ This project has no relation to the Residence plugin available on Spigot! No cod
 
 /res forceload - Force load every residence (Admin only) (Should only be used in EXTREME circumstances)
 
+/res reload - Reloads the plugin (Admin only)
+
 /res set <residence name> <greeting/farewell> <message | none | reset> - Set the greeting/farewell message to <message | none | default>
 
 /res sethome - Set your residence home
 
 /res home - Teleport to your residence home
 
-/res oset <player> <blocks> - Set the max claim area for <player> in <blocks> (Admin Only)
+/res oset <maxres | parea> <player> <residence count | blocks> - Set new max residence count for <player> | Set new max area in blocks for <player> (Admin Only)
 
 /res maxarea - Check your maximum amount of claimable blocks
 
 /res setname <new name> - Set a new name for your residence
 
 /res showarea <start/stop> <residence name> - Start showing/stop showing the claimed area of your specified residence to other players with particles
+
+/res updateplayers - Update all player max residence count and default area size from config (Admin Only)
 ```
 
 ### Dependencies
@@ -82,8 +88,8 @@ Residence residence = new Residence(area, player.getName());
 
 ### Versions
 
-This plugin supports Spigot [1.17.x](https://www.spigotmc.org/wiki/buildtools/#1-17-1)-[1.18.x](https://www.spigotmc.org/wiki/buildtools/#1-18-2)
+This plugin supports Spigot [1.17.x](https://www.spigotmc.org/wiki/buildtools/#1-17-1)-[1.19](https://www.spigotmc.org/wiki/buildtools/#1-19-2)
 
 ### Download
 
-You may download the plugin [here](https://www.mediafire.com/file/ymkq6iy2g280uqx/Residence.jar/file)
+You may download the plugin [here](https://www.mediafire.com/file/7y1z6xj5dlhogqm/Residence.jar/file)

@@ -58,6 +58,7 @@ public class ResListeners implements Listener{
 	}
 	
 	// Variables
+	Player player;
 	public static List<Material> applicableCrops = Arrays.asList(Material.WHEAT, Material.POTATOES, Material.CARROTS, Material.BEETROOTS);
 	public static HashMap<String, Boolean> playerInResidence = new HashMap<String, Boolean>();
 	public static HashMap<String, String> playerWasIn = new HashMap<String, String>();
@@ -102,6 +103,7 @@ public class ResListeners implements Listener{
 	public static HashMap<String, Residence> userInAreaSelectionResidence = new HashMap<>();
 	public static HashMap<String, Boolean> userLaunched = new HashMap<>();
 	public static HashMap<Residence, Boolean> residenceDenyDamage = new HashMap<>();
+	
 	
 	@SuppressWarnings("deprecation")
 	// Denying block placing in residence

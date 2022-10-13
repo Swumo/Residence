@@ -137,6 +137,9 @@ public class ResidenceMainMenu {
 			return;
 		}
 		if(clicked.getItemMeta().getDisplayName().contains(Utils.normal("&c&lDelete Residence"))) {
+			if(selectedResidence.get(player.getUniqueId()) == null) {
+				return;
+			}
 			player.closeInventory();
 			ResListeners.promptedUser.put(player.getName(), true);
 			ResListeners.promptedUserResidence.put(player.getName(), selectedResidence.get(player.getUniqueId()));

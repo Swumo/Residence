@@ -49,10 +49,24 @@ public class Commands implements TabExecutor{
 	public static HashMap<Player, Block> selectedBlock = new HashMap<Player, Block>();
 	public static HashMap<UUID, HashMap<Residence, BukkitTask>> residenceAreaShow = new HashMap<>();
 	private static CustomFile messages = Main.getMessagesFile();
+	private static CustomFile commandToggles = Main.getCommandTogglesFile();
 	
 	public static String pluginPrefix = Main.getInstance().getConfig().getString("pluginPrefix");
 	private static int previousMaxArea = 0;
 	private static int previousMaxRes = 0;
+	private static final List<String> managingCommands = Arrays.asList("Menu","Create","Add","Remove","Delete","Delall","Set","Sethome","Oset","Setname");
+	
+	private static boolean isCommandDisabled(String commandName) {
+		commandName = commandName.substring(0, 1).toUpperCase() + commandName.substring(1);
+		if(managingCommands.contains(commandName)) {
+			boolean isDisabled = commandToggles.getConfigField("Managing."+commandName);
+			return isDisabled;
+		}
+		else {
+			boolean isDisabled = commandToggles.getConfigField("Other."+commandName);
+			return isDisabled;
+		}
+	}
 	
 	public static ItemStack giveWand(Player player) {
 		ItemStack item = new ItemStack(Material.STICK);
@@ -142,13 +156,15 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal("&e/res delall &7- " + messages.getConfigField("Help.Delall")));
 			player.sendMessage(Utils.normal("&e/res list &7- " + messages.getConfigField("Help.List")));
 			player.sendMessage(Utils.normal("&e/res forceload &7- " + messages.getConfigField("Help.Forceload")));
+			player.sendMessage(Utils.normal("&e/res reload &7- " + messages.getConfigField("Help.Reload")));
 			player.sendMessage(Utils.normal("&e/res set <residence name> greeting/farewell <message> | none | reset &7- " + messages.getConfigField("Help.Set")));
 			player.sendMessage(Utils.normal("&e/res sethome &7- " + messages.getConfigField("Help.Sethome")));
 			player.sendMessage(Utils.normal("&e/res home <residence home> &7- " + messages.getConfigField("Help.Home")));
-			player.sendMessage(Utils.normal("&e/res oset <player> <blocks> &7- " + messages.getConfigField("Help.Oset")));
+			player.sendMessage(Utils.normal("&e/res oset <maxres | parea> <player> <residence count | blocks> &7- " + messages.getConfigField("Help.Oset")));
 			player.sendMessage(Utils.normal("&e/res maxarea &7- " + messages.getConfigField("Help.Maxarea")));
 			player.sendMessage(Utils.normal("&e/res setname <newname> &7- " + messages.getConfigField("Help.Setname")));
 			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- " + messages.getConfigField("Help.Showarea")));
+			player.sendMessage(Utils.normal("&e/res updateplayers &7- " + messages.getConfigField("Help.UpdatePlayers")));
 			player.sendMessage(Utils.normal("&7&m-----------------------------------------------"));
 			return true;
 		}
@@ -164,6 +180,7 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal("&e/res delall &7- " + messages.getConfigField("Help.Delall")));
 			player.sendMessage(Utils.normal("&e/res list &7- " + messages.getConfigField("Help.List")));
 			player.sendMessage(Utils.normal("&e/res forceload &7- " + messages.getConfigField("Help.Forceload")));
+			player.sendMessage(Utils.normal("&e/res reload &7- " + messages.getConfigField("Help.Reload")));
 			player.sendMessage(Utils.normal("&e/res set <residence name> greeting/farewell <message> | none | reset &7- " + messages.getConfigField("Help.Set")));
 			player.sendMessage(Utils.normal("&e/res sethome &7- " + messages.getConfigField("Help.Sethome")));
 			player.sendMessage(Utils.normal("&e/res home <residence home> &7- " + messages.getConfigField("Help.Home")));
@@ -171,33 +188,59 @@ public class Commands implements TabExecutor{
 			player.sendMessage(Utils.normal("&e/res maxarea &7- " + messages.getConfigField("Help.Maxarea")));
 			player.sendMessage(Utils.normal("&e/res setname <newname> &7- " + messages.getConfigField("Help.Setname")));
 			player.sendMessage(Utils.normal("&e/res showarea <start/stop> <residence name> &7- " + messages.getConfigField("Help.Showarea")));
+			player.sendMessage(Utils.normal("&e/res updateplayers &7- " + messages.getConfigField("Help.UpdatePlayers")));
 			player.sendMessage(Utils.normal("&7&m-----------------------------------------------"));
 			return true;
 		}
 		
+		// Update player permissions if config was updated
 		if(args[0].equalsIgnoreCase("updateplayers")) {
-			boolean value = updatePlayers();
-			if(value == true) {
-				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersTrue")));
-			} else {
-				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersFalse")));
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
 			}
-			return true;
+			if(player.isOp()) {
+				boolean value = updatePlayers();
+				if(value == true) {
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersTrue")));
+				} else {
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersFalse")));
+				}
+				return true;				
+			}
+			else {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
+				return false;
+			}
+
 		}
 		
 		// Reload config
 		if(args[0].equalsIgnoreCase("reload")) {
-			plugin.reloadConfig();
-			plugin.saveConfig();
-			resetVariables();
-			messages.reload();
-			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Reload")));
-			return true;
+			if(player.isOp()) {
+				plugin.reloadConfig();
+				plugin.saveConfig();
+				resetVariables();
+				messages.reload();
+				commandToggles.reload();
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Reload")));
+				return true;	
+			}
+			else {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
+				return false;
+			}
 		}
 
 		// Menu
 		
 		if(args[0].equalsIgnoreCase("menu")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			ResidencePreMainMenu.openInv(player);
 			return true;
 		}
@@ -206,6 +249,11 @@ public class Commands implements TabExecutor{
 		// Show area
 		
 		if(args[0].equalsIgnoreCase("showarea")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			LinkedList<Residence> residences = Residence.getResidences(player);
 			if(residences == null || residences.isEmpty()) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoResidences")));
@@ -276,6 +324,11 @@ public class Commands implements TabExecutor{
 		// Wand
 		
 		if(args[0].equalsIgnoreCase("wand")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(!player.isOp()) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
@@ -298,6 +351,11 @@ public class Commands implements TabExecutor{
 		// Set home
 		
 		if(args[0].equalsIgnoreCase("sethome")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			Residence res = Residence.getResidence(player.getLocation());
 			if(res == null) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.MustStand")));
@@ -313,6 +371,11 @@ public class Commands implements TabExecutor{
 		// Set name
 		
 		if(args[0].equalsIgnoreCase("setname")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			Residence res = Residence.getResidence(player.getLocation());
 			if(res == null || res.isOwner(player) == false) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.MustStand")));
@@ -346,6 +409,11 @@ public class Commands implements TabExecutor{
 		// Home
 			
 		if(args[0].equalsIgnoreCase("home")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(args.length < 2) {
 				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Name")));
 				return false;
@@ -368,6 +436,11 @@ public class Commands implements TabExecutor{
 		// Add
 		
 		if(args[0].equalsIgnoreCase("add")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(args.length < 2) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
 				return false;
@@ -412,6 +485,11 @@ public class Commands implements TabExecutor{
 		// Remove
 		
 		if(args[0].equalsIgnoreCase("remove")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(args.length < 2) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
 				return false;
@@ -455,6 +533,11 @@ public class Commands implements TabExecutor{
 		// Create
 		
 		if(args[0].equalsIgnoreCase("create")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			int defaultArea = Methods.getPlayerDefaultAreaSize(player);
 			HashMap<UUID, LinkedList<Residence>> residences = Residence.getResidenceMap();
 			LinkedList<Residence> resi = residences.get(player.getUniqueId());
@@ -480,7 +563,7 @@ public class Commands implements TabExecutor{
 			Cuboid area = new Cuboid(b1Loc, b2Loc);
 			if(area.getBlocks().size() >= defaultArea) {
 				String send = messages.getConfigField("Commands.AreaOverMax");
-				send = send.replace("%size%", String.valueOf(defaultArea)).replace("%current%", String.valueOf(area.getBlocks().size()));
+				send = send.replace("%size%", String.valueOf(defaultArea)).replace("%currently%", String.valueOf(area.getBlocks().size()));
 				player.sendMessage(Utils.normal(pluginPrefix+send));
 				return false;
 			}
@@ -529,6 +612,11 @@ public class Commands implements TabExecutor{
 		// Delete
 		
 		if(args[0].equalsIgnoreCase("delete")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(args.length < 2) {
 				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Name")));
 				return false;
@@ -552,6 +640,11 @@ public class Commands implements TabExecutor{
 		
 		// Delete all residences
 		if(args[0].equalsIgnoreCase("delall")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(!player.isOp()) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
@@ -595,6 +688,11 @@ public class Commands implements TabExecutor{
 		// List residences
 		
 		if(args[0].equalsIgnoreCase("list")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(!player.isOp()) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
@@ -616,6 +714,11 @@ public class Commands implements TabExecutor{
 		// Forceload
 		
 		if(args[0].equalsIgnoreCase("forceload")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(!player.isOp()) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
@@ -627,6 +730,11 @@ public class Commands implements TabExecutor{
 
 		// Set greeting/farewell
 		if(args[0].equalsIgnoreCase("set")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(args.length < 2) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Name")));
 				return false;
@@ -642,6 +750,11 @@ public class Commands implements TabExecutor{
 			}
 			name = name.replace("null", "");
 			name = name.trim();
+			Residence res = Residence.getResidence(player, name);
+			if(res == null) {
+				player.sendMessage(Utils.normal(pluginPrefix +messages.getConfigField("Commands.Exists")));
+				return false;
+			}
 			// If setting greeting message
 			if(args[stoppedOn + 1].equalsIgnoreCase("greeting")) {
 				if(stoppedOn + 2 >= args.length) {
@@ -650,7 +763,6 @@ public class Commands implements TabExecutor{
 				}
 				// If message was "none"
 				if(args[stoppedOn + 2].equalsIgnoreCase("none")) {
-					Residence res = Residence.getResidence(player, name);
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setGreetingMessage("null");
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
@@ -659,7 +771,6 @@ public class Commands implements TabExecutor{
 				}
 				// If message was "reset"
 				if(args[stoppedOn + 2].equalsIgnoreCase("reset")) {
-					Residence res = Residence.getResidence(player, name);
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setGreetingMessage(Main.greetingMessage);
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
@@ -670,7 +781,6 @@ public class Commands implements TabExecutor{
 				for(int i = stoppedOn + 2; i < args.length; i++) {
 					message += args[i] + " ";
 				}
-				Residence res = Residence.getResidence(player, name);
 				int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 				res.setGreetingMessage(message);
 				Residence.saveResidenceData(player.getUniqueId(), res, true, index);
@@ -685,7 +795,6 @@ public class Commands implements TabExecutor{
 				}
 				// If message was "none"
 				if(args[stoppedOn + 2].equalsIgnoreCase("none")) {
-					Residence res = Residence.getResidence(player, name);
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setFarewellMessage("null");
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
@@ -694,7 +803,6 @@ public class Commands implements TabExecutor{
 				}
 				// If message was "reset"
 				if(args[stoppedOn + 2].equalsIgnoreCase("reset")) {
-					Residence res = Residence.getResidence(player, name);
 					int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 					res.setFarewellMessage(Main.farewellMessage);
 					Residence.saveResidenceData(player.getUniqueId(), res, true, index);
@@ -705,7 +813,6 @@ public class Commands implements TabExecutor{
 				for(int i = stoppedOn + 2; i < args.length; i++) {
 					message += args[i] + " ";
 				}
-				Residence res = Residence.getResidence(player, name);
 				int index = Residence.removeResidenceFromList(player.getUniqueId(), res);
 				res.setFarewellMessage(message);
 				Residence.saveResidenceData(player.getUniqueId(), res, true, index);
@@ -718,6 +825,11 @@ public class Commands implements TabExecutor{
 		
 		// OP Set blocks/Max residences
 		if(args[0].equalsIgnoreCase("oset")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			if(!player.isOp()) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
@@ -732,6 +844,10 @@ public class Commands implements TabExecutor{
 					return false;
 				}
 				Player newPlayer = Bukkit.getPlayer(args[2]);
+				if(newPlayer == null) {
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPlayer")));
+					return false;
+				}
 				int newArea = Integer.valueOf(args[3]);
 				Methods.setPlayerDefaultAreaSize(newPlayer, newArea);
 				String sendOther = messages.getConfigField("Commands.AdminSetAreaOther");
@@ -754,7 +870,13 @@ public class Commands implements TabExecutor{
 					return false;
 				}
 				Player newPlayer = Bukkit.getPlayer(args[2]);
-				int newRes = Integer.valueOf(args[3]);
+				int newRes = 0;
+				try {
+					newRes = Integer.valueOf(args[3]);
+				} catch(NumberFormatException e) {
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoNumber")));
+					return false;
+				}
 				Methods.setPlayerMaxResidenceCount(newPlayer, newRes);
 				String sendOther = messages.getConfigField("Commands.AdminSetResidenceOther");
 				sendOther = sendOther.replace("%count%", String.valueOf(newRes));
@@ -770,6 +892,11 @@ public class Commands implements TabExecutor{
 		
 		// Check your max area size
 		if(args[0].equalsIgnoreCase("maxarea")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			int amount = Methods.getPlayerDefaultAreaSize(player);
 			String send = messages.getConfigField("Commands.MaxClaimBlocks");
 			send = send.replace("%amount%", String.valueOf(amount));
@@ -779,6 +906,11 @@ public class Commands implements TabExecutor{
 		
 		// Check your max residence count
 		if(args[0].equalsIgnoreCase("maxres")) {
+			boolean isDisabled = isCommandDisabled(args[0]);
+			if(isDisabled) {
+				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+				return false;
+			}
 			int amount = Methods.getPlayerMaxResidenceCount(player);
 			String send = messages.getConfigField("Commands.MaxResidences");
 			send = send.replace("%amount%", String.valueOf(amount));
@@ -821,7 +953,6 @@ public class Commands implements TabExecutor{
 			LinkedList<Residence> res = Residence.getResidences(player);
 			if(res == null || res.isEmpty()) {
 				firstArgs.add("create");
-				firstArgs.add("deselect");
 				firstArgs.add("menu");
 				firstArgs.add("maxarea");
 				firstArgs.add("maxres");
@@ -844,7 +975,6 @@ public class Commands implements TabExecutor{
 				firstArgs.add("create");
 				firstArgs.add("remove");
 				firstArgs.add("add");
-				firstArgs.add("deselect");
 				firstArgs.add("delete");
 				firstArgs.add("set");
 				firstArgs.add("menu");
