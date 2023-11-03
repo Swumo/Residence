@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -29,14 +30,6 @@ public class ResidencePlayerAddMenu {
 	public static void updateInventory(final Player player, Residence res) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
     	if(inv != null) {
-    		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-    		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
-    		for(int i = 0; i < rows; i++) {
-    			if(inv.getItem(i) == null) {
-    				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
-    			}
-    			else continue;
-    		}
     		
     		List<Player> players = new ArrayList<Player>(Bukkit.getOnlinePlayers());
     		players.remove(player);
@@ -57,6 +50,15 @@ public class ResidencePlayerAddMenu {
     		if(players.size() > 17) rows = 4 * 9;
     		if(players.size() > 26) rows = 5 * 9;
     		if(players.size() > 35) rows = 6 * 9;
+    		
+    		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+    		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+    		for(int i = 0; i < rows; i++) {
+    			if(inv.getItem(i) == null) {
+    				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+    			}
+    			else continue;
+    		}
     		
     		if(players.isEmpty()) {
 //    			Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
@@ -99,21 +101,13 @@ public class ResidencePlayerAddMenu {
 	
 
 	public static Inventory GUI(Player player, Residence res) {
-		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
-		for(int i = 0; i < rows; i++) {
-			if(inv.getItem(i) == null) {
-				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
-			}
-			else continue;
-		}
 		
 		List<Player> players = new ArrayList<Player>(Bukkit.getOnlinePlayers());
 		players.remove(player);
 		List<UUID> residents = res.getResidents();
 		if(residents != null) {
 			for(UUID id : residents) {
-				Player playerToRemove = Bukkit.getPlayer(id).getPlayer();
+				OfflinePlayer playerToRemove = Bukkit.getOfflinePlayer(id);
 				for(int i = 0; i < players.size(); i++) {
 					Player p = players.get(i);
 					if(p.equals(playerToRemove)) {
@@ -127,6 +121,15 @@ public class ResidencePlayerAddMenu {
 		if(players.size() > 17) rows = 4 * 9;
 		if(players.size() > 26) rows = 5 * 9;
 		if(players.size() > 35) rows = 6 * 9;
+		
+		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+		for(int i = 0; i < rows; i++) {
+			if(inv.getItem(i) == null) {
+				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+			}
+			else continue;
+		}
 		
 		if(players.isEmpty()) {
 //			Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore

@@ -1,8 +1,13 @@
 package ResiListeners;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 import ResClass.Residence;
 import ResCommands.Commands;
@@ -45,6 +51,7 @@ public class Listeners implements Listener{
 	
 	public static BukkitTask task1;
 	public static BukkitTask task2;
+	public static HashMap<UUID, List<Vector>> playerEdges = new HashMap<>();
 	
 	@EventHandler
 	public void onWandClick(PlayerInteractEvent event) {
@@ -58,15 +65,15 @@ public class Listeners implements Listener{
 			if(inHand.equals(wand)) {
 				if(player.isSneaking()) {
 					if(action.equals(Action.RIGHT_CLICK_AIR)) {
-						if(!Commands.block1.containsKey(player) && !Commands.block2.containsKey(player)) {
+						if(!Commands.block1.containsKey(player.getUniqueId()) && !Commands.block2.containsKey(player.getUniqueId())) {
 							player.sendMessage(Utils.normal(Commands.pluginPrefix +"&cYou do not have any positions selected!"));
 							return;
 						}
-						Commands.block1.remove(player);
-						Commands.block2.remove(player);
-						Commands.block1LeftClicked.remove(player);
-						Commands.block2RightClicked.remove(player);
-						Commands.selectedBlock.remove(player);
+						Commands.block1.remove(player.getUniqueId());
+						Commands.block2.remove(player.getUniqueId());
+						Commands.block1LeftClicked.remove(player.getUniqueId());
+						Commands.block2RightClicked.remove(player.getUniqueId());
+						Commands.selectedBlock.remove(player.getUniqueId());
 						if(task1 != null) {
 							task1.cancel();
 						}
@@ -75,6 +82,7 @@ public class Listeners implements Listener{
 						}
 						Methods.ListenersRemoveGlowingBlock(player, 1);
 						Methods.ListenersRemoveGlowingBlock(player, 2);
+						playerEdges.remove(player.getUniqueId());
 						player.sendMessage(Utils.normal(Commands.pluginPrefix +"&aSelection removed!"));
 						return;
 					}
@@ -98,12 +106,18 @@ public class Listeners implements Listener{
 							return;
 						}	
 					}
-					Commands.block1.put(player, block);
-					Commands.selectedBlock.put(player, block);
-					Commands.block1LeftClicked.put(player, true);
+					Commands.block1.put(player.getUniqueId(), block);
+					Commands.selectedBlock.put(player.getUniqueId(), block);
+					Commands.block1LeftClicked.put(player.getUniqueId(), true);
 					player.sendMessage(Utils.normal(Commands.pluginPrefix+"&aPosition 1 selected!"));
 					Methods.ListenersRemoveGlowingBlock(player, 1);
 					Methods.ListenersSpawnGlowingBlock(player, loc, 1);
+					if(Commands.block2.get(player.getUniqueId()) != null) {
+						Location b1Loc = Commands.block1.get(player.getUniqueId()).getLocation();
+						Location b2Loc = Commands.block2.get(player.getUniqueId()).getLocation();
+						List<Vector> edges = Utils.edges(b1Loc.toVector(), b2Loc.toVector());
+						playerEdges.put(player.getUniqueId(), edges);
+					}
 					event.setCancelled(true);
 					return;
 				}
@@ -118,12 +132,18 @@ public class Listeners implements Listener{
 							return;
 						}	
 					}
-					Commands.block2.put(player, block);
-					Commands.selectedBlock.put(player, block);
-					Commands.block2RightClicked.put(player, true);
+					Commands.block2.put(player.getUniqueId(), block);
+					Commands.selectedBlock.put(player.getUniqueId(), block);
+					Commands.block2RightClicked.put(player.getUniqueId(), true);
 					player.sendMessage(Utils.normal(Commands.pluginPrefix+"&aPosition 2 selected!"));
 					Methods.ListenersRemoveGlowingBlock(player, 2);
 					Methods.ListenersSpawnGlowingBlock(player, loc, 2);
+					if(Commands.block1.get(player.getUniqueId()) != null) {
+						Location b1Loc = Commands.block1.get(player.getUniqueId()).getLocation();
+						Location b2Loc = Commands.block2.get(player.getUniqueId()).getLocation();
+						List<Vector> edges = Utils.edges(b1Loc.toVector(), b2Loc.toVector());
+						playerEdges.put(player.getUniqueId(), edges);
+					}
 					return;
 				}
 			}	
@@ -131,6 +151,7 @@ public class Listeners implements Listener{
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	private void onGUIClick(InventoryClickEvent E) {
 		String title = E.getView().getTitle();
@@ -213,13 +234,18 @@ public class Listeners implements Listener{
 				if(playerToEditName.contains("Toggle")) {
 					playerToEditName = playerToEditName.replace("Toggle ", "");
 					playerToEditName = playerToEditName.substring(0, playerToEditName.indexOf(" "));
-					Player editing = Bukkit.getPlayer(playerToEditName);
+					OfflinePlayer editing = Bukkit.getOfflinePlayer(playerToEditName);
 					ResidencePlayerEditMenu.clicked((Player) E.getWhoClicked(), editing, E.getSlot(), E.getCurrentItem(), E.getInventory());
 					return;
 				}
-				Player editing = Bukkit.getPlayer(playerToEditName);
+				if(playerToEditName.isBlank()) {
+					OfflinePlayer editing = null;
+					ResidencePlayerEditMenu.clicked((Player) E.getWhoClicked(), editing, E.getSlot(), E.getCurrentItem(), E.getInventory());
+					return;
+				}
+				OfflinePlayer editing = Bukkit.getOfflinePlayer(playerToEditName);
 				ResidencePlayerEditMenu.clicked((Player) E.getWhoClicked(), editing, E.getSlot(), E.getCurrentItem(), E.getInventory());
-				return;
+				return;	
 			}
 		}
 	}

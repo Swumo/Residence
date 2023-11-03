@@ -33,22 +33,36 @@ public class ResidenceGeneralRulesMenu {
     			}
     			else continue;
     		}
-    		boolean creeper = res.getCreeperGriefing();
-    		boolean enderman = res.getEndermanGriefing();
-    		if(creeper == true) {
-    			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
+    		boolean creeperDisabled = Methods.isRuleDisabled("allowCreeperGriefing");
+    		boolean endermanDisabled = Methods.isRuleDisabled("allowEndermanGriefing");
+    		if(creeperDisabled || endermanDisabled) {
+    			if(creeperDisabled == true) {
+        			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");
+        		}
+        		if(endermanDisabled == true) {
+        			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");
+        		}
+        		Utils.createItem(inv, Material.ARROW, 1, 37, "&cBack", "&7&oGo back to the Edit menu");
+           		toReturn.setContents(inv.getContents());	
     		}
-    		if(creeper == false) {
-    			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
+    		else {
+    			boolean creeper = res.getCreeperGriefing();
+        		boolean enderman = res.getEndermanGriefing();
+        		if(creeper == true) {
+        			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
+        		}
+        		if(creeper == false) {
+        			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
+        		}
+        		if(enderman == true) {
+        			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
+        		}
+        		if(enderman == false) {
+        			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
+        		}
+           		Utils.createItem(inv, Material.ARROW, 1, 37, "&cBack", "&7&oGo back to the Edit menu");
+           		toReturn.setContents(inv.getContents());	
     		}
-    		if(enderman == true) {
-    			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
-    		}
-    		if(enderman == false) {
-    			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
-    		}
-       		Utils.createItem(inv, Material.ARROW, 1, 37, "&cBack", "&7&oGo back to the Edit menu");
-       		toReturn.setContents(inv.getContents());
     	}
 	}
 	
@@ -63,24 +77,39 @@ public class ResidenceGeneralRulesMenu {
 			}
 			else continue;
 		}
-		boolean creeper = res.getCreeperGriefing();
-		boolean enderman = res.getEndermanGriefing();
-		if(creeper == true) {
-			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
+		boolean creeperDisabled = Methods.isRuleDisabled("allowCreeperGriefing");
+		boolean endermanDisabled = Methods.isRuleDisabled("allowEndermanGriefing");
+		if(creeperDisabled || endermanDisabled) {
+			if(creeperDisabled == true) {
+    			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");
+    		}
+    		if(endermanDisabled == true) {
+    			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");
+    		}
+    		Utils.createItem(inv, Material.ARROW, 1, 37, "&cBack", "&7&oGo back to the Edit menu");
+       		toReturn.setContents(inv.getContents());
+       		return toReturn;
 		}
-		if(creeper == false) {
-			Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
+		else {
+			boolean creeper = res.getCreeperGriefing();
+			boolean enderman = res.getEndermanGriefing();
+			if(creeper == true) {
+				Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
+			}
+			if(creeper == false) {
+				Utils.createItem(inv, Material.CREEPER_HEAD, 1, 22, "&e&lToggle &2&lCreeper &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
+			}
+			if(enderman == true) {
+				Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
+			}
+			if(enderman == false) {
+				Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
+			}
+	   		Utils.createItem(inv, Material.ARROW, 1, 37, "&cBack", "&7&oGo back to the Edit menu");
+	  
+			toReturn.setContents(inv.getContents());
+			return toReturn;	
 		}
-		if(enderman == true) {
-			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
-		}
-		if(enderman == false) {
-			Utils.createItem(inv, Material.ENDER_PEARL, 1, 24, "&e&lToggle &5&lEnderman &b&lGriefing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle");
-		}
-   		Utils.createItem(inv, Material.ARROW, 1, 37, "&cBack", "&7&oGo back to the Edit menu");
-  
-		toReturn.setContents(inv.getContents());
-		return toReturn;
 	}
 	
 	

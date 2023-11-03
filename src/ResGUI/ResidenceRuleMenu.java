@@ -37,9 +37,14 @@ public class ResidenceRuleMenu {
     		}
     		HashMap<String, Boolean> rules = res.getAllRules();
     		for(String key : rules.keySet()) {
+    			boolean isDisabled = Methods.isRuleDisabled(key);
     			boolean value = rules.get(key);
     			switch(key) {
     			case "allowTeleport":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.FEATHER, 1, 13, "&e&lToggle &d&lTeleport", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
     					Utils.createItem(inv, Material.FEATHER, 1, 13, "&e&lToggle &d&lTeleport", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");	
     				}
@@ -48,6 +53,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowBlockPlacing":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.GRASS_BLOCK, 1, 14, "&e&lToggle &a&lBlock Placing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.GRASS_BLOCK, 1, 14, "&e&lToggle &a&lBlock Placing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
     				}
@@ -56,6 +65,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowBlockBreaking":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.BARRIER, 1, 15, "&e&lToggle &a&lBlock &c&lBreaking", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.BARRIER, 1, 15, "&e&lToggle &a&lBlock &c&lBreaking", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
     				}
@@ -64,6 +77,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowBlockInteraction":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, etc.", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
     				}
@@ -72,6 +89,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowEntityInteraction":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes placing entities like item frames and armor stands");
     				}
@@ -80,6 +101,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowDamageEntities":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.ARMOR_STAND, 1, 24, "&e&lToggle &f&lEntity &4&lDamage", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.ARMOR_STAND, 1, 24, "&e&lToggle &f&lEntity &4&lDamage", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes breaking entities like item frames and armor stands");
     				}
@@ -88,6 +113,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowVehicleDestroy":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.MINECART, 1, 31, "&e&lToggle &6&lVehicle &c&lBreaking", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.MINECART, 1, 31, "&e&lToggle &6&lVehicle &c&lBreaking", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes breaking minecarts and boats");
     				}
@@ -96,6 +125,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowTNTPlacing":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.TNT, 1, 32, "&e&lToggle &c&lT&f&lN&c&lT &a&lPlacing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.TNT, 1, 32, "&e&lToggle &c&lT&f&lN&c&lT &a&lPlacing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
     				}
@@ -104,6 +137,10 @@ public class ResidenceRuleMenu {
     				}
     				break;
     			case "allowEntering":
+    				if(isDisabled) {
+    					Utils.createItem(inv, Material.LEATHER_BOOTS, 1, 33, "&e&lToggle &e&lEntering", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					break;
+    				}
     				if(value == true) {
 						Utils.createItem(inv, Material.LEATHER_BOOTS, 1, 33, "&e&lToggle &e&lEntering", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
     				}
@@ -133,9 +170,14 @@ public class ResidenceRuleMenu {
 		}
 		HashMap<String, Boolean> rules = res.getAllRules();
 		for(String key : rules.keySet()) {
+			boolean isDisabled = Methods.isRuleDisabled(key);
 			boolean value = rules.get(key);
 			switch(key) {
 			case "allowTeleport":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.FEATHER, 1, 13, "&e&lToggle &d&lTeleport", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.FEATHER, 1, 13, "&e&lToggle &d&lTeleport", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");	
 				}
@@ -144,6 +186,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowBlockPlacing":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.GRASS_BLOCK, 1, 14, "&e&lToggle &a&lBlock Placing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.GRASS_BLOCK, 1, 14, "&e&lToggle &a&lBlock Placing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
 				}
@@ -152,6 +198,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowBlockBreaking":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.BARRIER, 1, 15, "&e&lToggle &a&lBlock &c&lBreaking", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.BARRIER, 1, 15, "&e&lToggle &a&lBlock &c&lBreaking", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
 				}
@@ -160,6 +210,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowBlockInteraction":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, etc.", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
 				}
@@ -168,6 +222,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowEntityInteraction":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes placing entities like item frames and armor stands");
 				}
@@ -176,6 +234,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowDamageEntities":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.ARMOR_STAND, 1, 24, "&e&lToggle &f&lEntity &4&lDamage", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.ARMOR_STAND, 1, 24, "&e&lToggle &f&lEntity &4&lDamage", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes breaking entities like item frames and armor stands");
 				}
@@ -184,6 +246,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowVehicleDestroy":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.MINECART, 1, 31, "&e&lToggle &6&lVehicle &c&lBreaking", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.MINECART, 1, 31, "&e&lToggle &6&lVehicle &c&lBreaking", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes breaking minecarts and boats");
 				}
@@ -192,6 +258,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowTNTPlacing":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.TNT, 1, 32, "&e&lToggle &c&lT&f&lN&c&lT &a&lPlacing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.TNT, 1, 32, "&e&lToggle &c&lT&f&lN&c&lT &a&lPlacing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
 				}
@@ -200,6 +270,10 @@ public class ResidenceRuleMenu {
 				}
 				break;
 			case "allowEntering":
+				if(isDisabled) {
+					Utils.createItem(inv, Material.LEATHER_BOOTS, 1, 33, "&e&lToggle &e&lEntering", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					break;
+				}
 				if(value == true) {
 					Utils.createItem(inv, Material.LEATHER_BOOTS, 1, 33, "&e&lToggle &e&lEntering", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle");
 				}

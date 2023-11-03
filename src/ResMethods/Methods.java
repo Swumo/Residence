@@ -55,9 +55,41 @@ public class Methods {
 	 * 
 	 */
 	public static List<EntityType> entities = Arrays.asList(EntityType.values());
+	private static CustomFile ruleDisabling = Main.getRuleDisablingFile();
+	
+	public static boolean isRuleDisabled(String rule) {
+		return ruleDisabling.getConfigField(rule);
+	}
 	
 	
 	
+	/**
+	 * Populate ruleDisabling file
+	 * @param rules
+	 */
+	public static void populateRuleDisabling(CustomFile rules) {
+		rules.setHeader("Author - Swumo\n"
+				+ "Enable/Disable rules\n"
+				+ "!!! Disabling the rule will not let you toggle it on/off in game !!!\n"
+				+ "Is rule disabled?:");
+		rules.getConfigField("allowBlockPlacing", false);
+		rules.getConfigField("allowBlockBreaking", false);
+		rules.getConfigField("allowBlockInteraction", false);
+		rules.getConfigField("allowEntityInteraction", false);
+		rules.getConfigField("allowDamageEntities", false);
+		rules.getConfigField("allowVehicleDestroy", false);
+		rules.getConfigField("allowTNTPlacing", false);
+		rules.getConfigField("allowTeleport", false);
+		rules.getConfigField("allowEntering", false);
+		rules.getConfigField("allowCreeperGriefing", false);
+		rules.getConfigField("allowEndermanGriefing", false);
+	}
+	
+	
+	/**
+	 * Populate commandToggles file
+	 * @param toggles
+	 */
 	public static void populateToggles(CustomFile toggles) {
 		toggles.setHeader("Author - Swumo\n"
 				+ "Enable/Disable commands\n"
@@ -362,9 +394,9 @@ public class Methods {
 	 * @param player - Name of the player to remove
 	 * @param res - Residence
 	 */
-	public static void removeResidentPerms(String player, Residence res) {
+	public static void removeResidentPerms(UUID player, Residence res) {
 		LuckPerms api = Main.getLP();
-		User user = api.getUserManager().getUser(player);
+		User user = getUserFromOfflinePlayer(player);
 		List<Node> nodes = (List<Node>) user.getNodes();
 		for(int i = 0; i < nodes.size(); i++) {
 			Node node = nodes.get(i);
@@ -772,6 +804,11 @@ public class Methods {
 	 */
 	@SuppressWarnings("deprecation")
 	public static void GenRuleMenuUpdateRule(Player player, String rule, Residence res) {
+		boolean creeperDisabled = isRuleDisabled("allowCreeperGriefing");
+		boolean endermanDisabled = isRuleDisabled("allowEndermanGriefing");
+		if(creeperDisabled || endermanDisabled) {
+			return;
+		}
 		switch(rule) {
 		case "allowCreeperGriefing":
 			boolean creeper = res.getCreeperGriefing();
@@ -865,22 +902,21 @@ public class Methods {
 				List<Player> players = (List<Player>) Bukkit.getOnlinePlayers();
 				if(!players.isEmpty()) {
 					for(Player p : players) {
-						String value = null;
-						LuckPerms api = Main.getLP();
-						User user = api.getUserManager().getUser(p.getName());
-						List<Node> nodes = (List<Node>) user.getNodes();
-						for(int i = 0; i < nodes.size(); i++) {
-				   			Node node = nodes.get(i);
-				   			if(node.getKey().contains("meta.residence\\.particlecolour.")) {
-				   				MetaNode mNode = (MetaNode) node;
-				   				value = mNode.getMetaValue();
-				   			}
-						}
-						Color color = ListenersStringToColour(value);
-						if(Commands.block1.containsKey(p) && Commands.block2.containsKey(p)) {
-							Location b1Loc = Commands.block1.get(p).getLocation();
-							Location b2Loc = Commands.block2.get(p).getLocation();
-							List<Vector> edges = Utils.edges(b1Loc.toVector(), b2Loc.toVector());
+						if(Commands.block1.containsKey(p.getUniqueId()) && Commands.block2.containsKey(p.getUniqueId())) {
+							String value = null;
+							LuckPerms api = Main.getLP();
+							User user = api.getUserManager().getUser(p.getName());
+							List<Node> nodes = (List<Node>) user.getNodes();
+							for(int i = 0; i < nodes.size(); i++) {
+					   			Node node = nodes.get(i);
+					   			if(node.getKey().contains("meta.residence\\.particlecolour.")) {
+					   				MetaNode mNode = (MetaNode) node;
+					   				value = mNode.getMetaValue();
+					   			}
+							}
+							Color color = ListenersStringToColour(value);
+							
+							List<Vector> edges = Listeners.playerEdges.get(p.getUniqueId());
 							for(Vector edge : edges) {
 								Location toSpawn = edge.toLocation(p.getWorld());
 								Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1);
@@ -1024,16 +1060,18 @@ public class Methods {
 	 * @param blockNumber - Integer (1-2)
 	 * @apiNote Should not be used on its own, as it could break some things!
 	 */
-	public static void ListenersRemoveGlowingBlock(Player player, int blockNumber) {
-		World world = player.getWorld();
-		List<Entity> entities = world.getEntities();
-		for(int i = 0; i < entities.size(); i++) {
-			Entity ent = entities.get(i);
-			if(ent.getCustomName() == null) continue;
-			if(ent.getCustomName().equals(player.getName()+"Block"+blockNumber)) {
-				ent.remove();
-			}
-			continue;
+	public static void ListenersRemoveGlowingBlock(OfflinePlayer player, int blockNumber) {
+		for(World world : Bukkit.getServer().getWorlds()) {
+			List<Entity> entities = world.getEntities();
+			for(int i = 0; i < entities.size(); i++) {
+				Entity ent = entities.get(i);
+				if(ent.getCustomName() == null) continue;
+				if(ent.getCustomName().equals(player.getName()+"Block"+blockNumber)) {
+					ent.remove();
+					break;
+				}
+				continue;
+			}	
 		}
 	}
 	
@@ -1226,7 +1264,7 @@ public class Methods {
 				residents = null;
 			}
 			else {
-				String[] ids = resString.split("/");
+				String[] ids = resString.split(",");
 				for(String id : ids) {
 					residents.add(UUID.fromString(id));	
 				}

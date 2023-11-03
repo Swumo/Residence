@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import ResClass.Residence;
 import ResCommands.Commands;
+import ResMethods.Methods;
 import ResUtils.Utils;
 import ResiListeners.ResListeners;
 
@@ -151,6 +152,10 @@ public class ResidenceMainMenu {
 			return;
 		}
 		if(clicked.getItemMeta().getDisplayName().contains(Utils.normal("&b&lTeleport to Residence"))) {
+			if(Methods.isRuleDisabled("allowTeleport")) {
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&cTeleports have been disabled globally"));
+				return;
+			}
 			player.closeInventory();
 			ResidenceTeleportMenu.openInv(player);
 			return;

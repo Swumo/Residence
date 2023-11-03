@@ -35,14 +35,6 @@ public class ResidenceTeleportMenu {
 	public static void updateInventory(final Player player) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
     	if(inv != null) {
-    		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-    		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
-    		for(int i = 0; i < rows; i++) {
-    			if(inv.getItem(i) == null) {
-    				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
-    			}
-    			else continue;
-    		}
     		
     		List<Residence> availableResidences = new ArrayList<Residence>();
     		
@@ -80,13 +72,23 @@ public class ResidenceTeleportMenu {
         			if(inv.getItem(i).getType() != Material.ARROW) Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
         		}
     		} 
-    		toReturn.setContents(inv.getContents());
-    		
     		
     		if(availableResidences.size() > 8) rows = 3 * 9;
     		if(availableResidences.size() > 17) rows = 4 * 9;
     		if(availableResidences.size() > 26) rows = 5 * 9;
     		if(availableResidences.size() > 35) rows = 6 * 9;
+    		
+    		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+    		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+    		for(int i = 0; i < rows; i++) {
+    			if(inv.getItem(i) == null) {
+    				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+    			}
+    			else continue;
+    		}
+    		
+    		toReturn.setContents(inv.getContents());
+    		
     		
     		if(availableResidences == null || availableResidences.isEmpty()) {
     			Utils.createItem(inv, Material.ARROW, 1, 10, Utils.normal("&cBack"));
@@ -104,14 +106,6 @@ public class ResidenceTeleportMenu {
 	
 
 	public static Inventory GUI(Player player) {
-		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
-		for(int i = 0; i < rows; i++) {
-			if(inv.getItem(i) == null) {
-				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
-			}
-			else continue;
-		}
 		
 		List<Residence> availableResidences = new ArrayList<Residence>();
 		
@@ -149,13 +143,22 @@ public class ResidenceTeleportMenu {
     			if(inv.getItem(i).getType() != Material.ARROW) Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
     		}
 		} 
-		toReturn.setContents(inv.getContents());
-		
 		
 		if(availableResidences.size() > 8) rows = 3 * 9;
 		if(availableResidences.size() > 17) rows = 4 * 9;
 		if(availableResidences.size() > 26) rows = 5 * 9;
 		if(availableResidences.size() > 35) rows = 6 * 9;
+		
+		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+		for(int i = 0; i < rows; i++) {
+			if(inv.getItem(i) == null) {
+				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+			}
+			else continue;
+		}
+		
+		toReturn.setContents(inv.getContents());
 		
 		if(availableResidences == null || availableResidences.isEmpty()) {
 			Utils.createItem(inv, Material.ARROW, 1, 10, Utils.normal("&cBack"));

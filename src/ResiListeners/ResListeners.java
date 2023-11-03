@@ -15,7 +15,9 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,6 +30,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -42,6 +45,7 @@ import ResCommands.Commands;
 import ResMain.Main;
 import ResMethods.Methods;
 import ResUtils.Cuboid;
+import ResUtils.MessageUtil;
 import ResUtils.Utils;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
@@ -63,46 +67,60 @@ public class ResListeners implements Listener{
 	public static HashMap<String, Boolean> playerInResidence = new HashMap<String, Boolean>();
 	public static HashMap<String, String> playerWasIn = new HashMap<String, String>();
 	public static HashMap<String, String> playerWasInResidence = new HashMap<>();
-	private static final List<EntityType> entityBreak = Arrays.asList(
-			EntityType.BOAT, EntityType.ITEM_FRAME, EntityType.ARMOR_STAND, EntityType.MINECART, 
-			EntityType.MINECART_CHEST, EntityType.MINECART_COMMAND, EntityType.MINECART_FURNACE, 
-			EntityType.MINECART_HOPPER, EntityType.MINECART_TNT);
-	private static final List<Material> interactiveBlocks = Arrays.asList(
-			Material.DISPENSER, Material.DROPPER, Material.CHEST, Material.BLAST_FURNACE, 
-			Material.ENDER_CHEST, Material.TRAPPED_CHEST, Material.FURNACE, Material.GRINDSTONE, 
-			Material.ENCHANTING_TABLE, Material.JUKEBOX, Material.ANVIL, Material.CHIPPED_ANVIL, 
-			Material.DAMAGED_ANVIL, Material.SHULKER_BOX, Material.BLACK_BED, Material.BLUE_BED, 
-			Material.BROWN_BED, Material.CYAN_BED, Material.GRAY_BED, Material.GREEN_BED, 
-			Material.LIGHT_BLUE_BED, Material.LIGHT_GRAY_BED, Material.LIME_BED, Material.MAGENTA_BED, 
-			Material.ORANGE_BED, Material.PINK_BED, Material.PURPLE_BED, Material.RED_BED, Material.WHITE_BED, 
-			Material.YELLOW_BED, Material.LOOM, Material.COMPOSTER, Material.BARREL, Material.SMOKER, 
-			Material.CARTOGRAPHY_TABLE, Material.CRAFTING_TABLE, Material.FLETCHING_TABLE, Material.SMITHING_TABLE, 
-			Material.BELL, Material.LODESTONE);
-	private static final List<Material> items = Arrays.asList(
-			Material.WATER_BUCKET, Material.LAVA_BUCKET, Material.ACACIA_SIGN, Material.ACACIA_WALL_SIGN, 
-			Material.BIRCH_SIGN, Material.BIRCH_WALL_SIGN, Material.CRIMSON_SIGN, Material.CRIMSON_WALL_SIGN, 
-			Material.DARK_OAK_SIGN, Material.DARK_OAK_WALL_SIGN, Material.JUNGLE_SIGN, Material.JUNGLE_WALL_SIGN, 
-			Material.OAK_SIGN, Material.OAK_WALL_SIGN, Material.SPRUCE_SIGN, Material.SPRUCE_WALL_SIGN, Material.WARPED_SIGN, 
-			Material.WARPED_WALL_SIGN, Material.ITEM_FRAME, Material.ARMOR_STAND);
-	private static final List<Material> physicalBlocks = Arrays.asList(
-			Material.ACACIA_FENCE_GATE, Material.BIRCH_FENCE_GATE, Material.CRIMSON_FENCE_GATE, Material.DARK_OAK_FENCE_GATE,
-			Material.JUNGLE_FENCE_GATE, Material.OAK_FENCE_GATE, Material.SPRUCE_FENCE_GATE, Material.WARPED_FENCE_GATE,    
-			Material.ACACIA_DOOR, Material.BIRCH_DOOR, Material.CRIMSON_DOOR, Material.DARK_OAK_DOOR, Material.IRON_DOOR, 
-			Material.JUNGLE_DOOR, Material.OAK_DOOR, Material.SPRUCE_DOOR, Material.WARPED_DOOR, Material.ACACIA_BUTTON, 
-			Material.BIRCH_BUTTON, Material.CRIMSON_BUTTON, Material.DARK_OAK_BUTTON, Material.JUNGLE_BUTTON, 
-			Material.OAK_BUTTON, Material.POLISHED_BLACKSTONE_BUTTON, Material.SPRUCE_BUTTON, Material.STONE_BUTTON, 
-			Material.WARPED_BUTTON, Material.ACACIA_PRESSURE_PLATE, Material.BIRCH_PRESSURE_PLATE, Material.CRIMSON_PRESSURE_PLATE, 
-			Material.DARK_OAK_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.JUNGLE_PRESSURE_PLATE, 
-			Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.OAK_PRESSURE_PLATE, Material.POLISHED_BLACKSTONE_PRESSURE_PLATE, 
-			Material.SPRUCE_PRESSURE_PLATE, Material.STONE_PRESSURE_PLATE, Material.WARPED_PRESSURE_PLATE, Material.LEVER,
-			Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR, Material.DARK_OAK_TRAPDOOR, 
-			Material.JUNGLE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.WARPED_TRAPDOOR);
+	private static MessageUtil messageUtil = Main.getMessageUtil();
+	private static final List<EntityType> entityBreak = Arrays.stream(EntityType.values()).filter(mat -> mat.name().contains("MINECART") 
+			|| mat.name().contains("FRAME") || mat.name().contains("BOAT") || mat.name().contains("")).toList();
+//	private static final List<EntityType> entityBreak = Arrays.asList(
+//			EntityType.BOAT, EntityType.ITEM_FRAME, EntityType.ARMOR_STAND, EntityType.MINECART, 
+//			EntityType.MINECART_CHEST, EntityType.MINECART_COMMAND, EntityType.MINECART_FURNACE, 
+//			EntityType.MINECART_HOPPER, EntityType.MINECART_TNT);
+	private static final List<Material> interactiveBlocks = Arrays.stream(Material.values()).filter(mat -> (mat.name().contains("DISPENSER") 
+			 || mat.name().contains("DROPPER") || mat.name().contains("CHEST") || mat.name().contains("FURNACE") || mat.name().contains("GRINDSTONE") 
+			 || mat.name().contains("TABLE") || mat.name().contains("BOX") || mat.name().contains("ANVIL") || mat.name().contains("BED")
+			 || mat.name().contains("LOOM") || mat.name().contains("COMPOSTER") || mat.name().contains("BARREL") || mat.name().contains("SMOKER")
+			 || mat.name().contains("BELL") || mat.name().contains("LODESTONE")) || mat.name().contains("LECTERN") && (!mat.name().contains("BOAT") && !mat.name().contains("MINECART") 
+					 && !mat.name().contains("BAMBOO") && !mat.name().contains("PLATE") && !mat.name().contains("ROCK") & !mat.name().contains("BOOK"))).toList();
+//	private static final List<Material> interactiveBlocks = Arrays.asList(
+//			Material.DISPENSER, Material.DROPPER, Material.CHEST, Material.BLAST_FURNACE, 
+//			Material.ENDER_CHEST, Material.TRAPPED_CHEST, Material.FURNACE, Material.GRINDSTONE, 
+//			Material.ENCHANTING_TABLE, Material.JUKEBOX, Material.ANVIL, Material.CHIPPED_ANVIL, 
+//			Material.DAMAGED_ANVIL, Material.SHULKER_BOX, Material.BLACK_BED, Material.BLUE_BED, 
+//			Material.BROWN_BED, Material.CYAN_BED, Material.GRAY_BED, Material.GREEN_BED, 
+//			Material.LIGHT_BLUE_BED, Material.LIGHT_GRAY_BED, Material.LIME_BED, Material.MAGENTA_BED, 
+//			Material.ORANGE_BED, Material.PINK_BED, Material.PURPLE_BED, Material.RED_BED, Material.WHITE_BED, 
+//			Material.YELLOW_BED, Material.LOOM, Material.COMPOSTER, Material.BARREL, Material.SMOKER, 
+//			Material.CARTOGRAPHY_TABLE, Material.CRAFTING_TABLE, Material.FLETCHING_TABLE, Material.SMITHING_TABLE, 
+//			Material.BELL, Material.LODESTONE);
+//	private static final List<Material> items = Arrays.asList(
+//			Material.WATER_BUCKET, Material.LAVA_BUCKET, Material.ACACIA_SIGN, Material.ACACIA_WALL_SIGN, 
+//			Material.BIRCH_SIGN, Material.BIRCH_WALL_SIGN, Material.CRIMSON_SIGN, Material.CRIMSON_WALL_SIGN, 
+//			Material.DARK_OAK_SIGN, Material.DARK_OAK_WALL_SIGN, Material.JUNGLE_SIGN, Material.JUNGLE_WALL_SIGN, 
+//			Material.OAK_SIGN, Material.OAK_WALL_SIGN, Material.SPRUCE_SIGN, Material.SPRUCE_WALL_SIGN, Material.WARPED_SIGN, 
+//			Material.WARPED_WALL_SIGN, Material.ITEM_FRAME, Material.ARMOR_STAND);
+	private static final List<Material> items = Arrays.stream(Material.values()).filter(mat -> (mat.name().contains("BUCKET") 
+			|| mat.name().contains("SIGN") || mat.name().contains("FRAME") || mat.name().contains("ARMOR_STAND")) && !mat.name().contains("MILK")).toList();
+//	private static final List<Material> physicalBlocks = Arrays.asList(
+//			Material.ACACIA_FENCE_GATE, Material.BIRCH_FENCE_GATE, Material.CRIMSON_FENCE_GATE, Material.DARK_OAK_FENCE_GATE,
+//			Material.JUNGLE_FENCE_GATE, Material.OAK_FENCE_GATE, Material.SPRUCE_FENCE_GATE, Material.WARPED_FENCE_GATE,    
+//			Material.ACACIA_DOOR, Material.BIRCH_DOOR, Material.CRIMSON_DOOR, Material.DARK_OAK_DOOR, Material.IRON_DOOR, 
+//			Material.JUNGLE_DOOR, Material.OAK_DOOR, Material.SPRUCE_DOOR, Material.WARPED_DOOR, Material.ACACIA_BUTTON, 
+//			Material.BIRCH_BUTTON, Material.CRIMSON_BUTTON, Material.DARK_OAK_BUTTON, Material.JUNGLE_BUTTON, 
+//			Material.OAK_BUTTON, Material.POLISHED_BLACKSTONE_BUTTON, Material.SPRUCE_BUTTON, Material.STONE_BUTTON, 
+//			Material.WARPED_BUTTON, Material.ACACIA_PRESSURE_PLATE, Material.BIRCH_PRESSURE_PLATE, Material.CRIMSON_PRESSURE_PLATE, 
+//			Material.DARK_OAK_PRESSURE_PLATE, Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.JUNGLE_PRESSURE_PLATE, 
+//			Material.LIGHT_WEIGHTED_PRESSURE_PLATE, Material.OAK_PRESSURE_PLATE, Material.POLISHED_BLACKSTONE_PRESSURE_PLATE, 
+//			Material.SPRUCE_PRESSURE_PLATE, Material.STONE_PRESSURE_PLATE, Material.WARPED_PRESSURE_PLATE, Material.LEVER,
+//			Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR, Material.DARK_OAK_TRAPDOOR, 
+//			Material.JUNGLE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.WARPED_TRAPDOOR);
+	private static final List<Material> physicalBlocks = Arrays.stream(Material.values()).filter(mat -> (mat.name().contains("GATE") 
+			|| mat.name().contains("DOOR") || mat.name().contains("BUTTON") || mat.name().contains("PRESSURE") || mat.name().contains("LEVER")) && !mat.name().contains("END")).toList();
 	public static HashMap<String, Boolean> promptedUser = new HashMap<>();
 	public static HashMap<String, Residence> promptedUserResidence = new HashMap<>();
 	public static HashMap<String, Boolean> userInAreaSelection = new HashMap<>();
 	public static HashMap<String, Residence> userInAreaSelectionResidence = new HashMap<>();
 	public static HashMap<String, Boolean> userLaunched = new HashMap<>();
 	public static HashMap<Residence, Boolean> residenceDenyDamage = new HashMap<>();
+	
 	
 	
 	@SuppressWarnings("deprecation")
@@ -604,6 +622,12 @@ public class ResListeners implements Listener{
 				return;
 			}
 		}
+		if(!messageUtil.getMessages(player.getUniqueId()).isEmpty()) {
+			List<String> messages = messageUtil.getMessages(player.getUniqueId());
+			for(int i = 0; i < messages.size(); i++) {
+				player.sendMessage(messages.get(i));
+			}
+		}
 	}
 	
 	
@@ -614,8 +638,8 @@ public class ResListeners implements Listener{
 		LuckPerms api = Main.getLP();
 		User user = Methods.getUserFromOfflinePlayer(player.getUniqueId());
 		api.getUserManager().saveUser(user);
-		Commands.block1.remove(player);
-		Commands.block2.remove(player);
+		Commands.block1.remove(player.getUniqueId());
+		Commands.block2.remove(player.getUniqueId());
 		Methods.ListenersRemoveGlowingBlock(player, 1);
 		Methods.ListenersRemoveGlowingBlock(player, 2);
 	}
@@ -991,9 +1015,12 @@ public class ResListeners implements Listener{
 		if(block == null) {
 			return;
 		}
-		if(block.getType() == Material.FARMLAND) {
-			event.setCancelled(true);
-			return;
+		Residence res = Residence.getResidence(block.getLocation());
+		if(res != null) {
+			if(block.getType() == Material.FARMLAND) {
+				event.setCancelled(true);
+				return;
+			}	
 		}
 	}
 	
@@ -1697,6 +1724,129 @@ public class ResListeners implements Listener{
 		}
 	}
 	
+	// Deny breaking item frames (with arrows)
+	@SuppressWarnings("deprecation")
+	@EventHandler(priority = EventPriority.HIGH)
+	private void onHangingBreak(HangingBreakByEntityEvent event) {
+		if(!(event.getRemover() instanceof Player)) return;
+		Player player = (Player) event.getRemover();
+		Entity entity = event.getEntity();
+		Location loc = entity.getLocation();
+		Residence res = Residence.getResidence(loc);
+		if(res == null) return;
+		Player owner = Bukkit.getPlayer(res.getOwner());
+		OfflinePlayer offOwner = null;
+		if(owner == null) {
+			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
+		}
+		if(Main.protectOnlyWhileOffline == true && owner != null) {
+			return;
+		}
+		boolean value = res.getAllowDamageEntities();
+		if(value == true) {
+			return;
+		}
+		if(value == false) {
+			if(Main.protectOnlyWhileOffline == true) {
+				List<UUID> residents = res.getResidents();
+				if(entityBreak.contains(entity.getType())) {
+					if(residents != null) {
+						if(residents.contains(player.getUniqueId())) {
+							boolean residentValue = false;
+							if(offOwner != null) {
+								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
+								if(residentValue == false) {
+									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										event.setCancelled(true);
+										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+										return;
+									}
+								}
+								if(residentValue == true) {
+									return;
+								}	
+							}
+							if(owner == null && offOwner != null) {
+								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowDamageEntities", res);
+								if(residentValue == false) {
+									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										event.setCancelled(true);
+										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+										return;
+									}
+								}
+								if(residentValue == true) {
+									return;
+								}
+							}
+						}
+						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+							event.setCancelled(true);
+							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+							return;
+						}	
+					}
+					else {
+						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+							event.setCancelled(true);
+							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+							return;
+						}	
+					}	
+				}
+			}
+			if(Main.protectOnlyWhileOffline == false) {
+				List<UUID> residents = res.getResidents();
+				if(entityBreak.contains(entity.getType())) {
+					if(residents != null) {
+						if(residents.contains(player.getUniqueId())) {
+							boolean residentValue = false;
+							if(owner != null) {
+								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
+								if(residentValue == false) {
+									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										event.setCancelled(true);
+										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+										return;
+									}
+								}
+								if(residentValue == true) {
+									return;
+								}	
+							}
+							if(owner == null && offOwner != null) {
+								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowDamageEntities", res);
+								if(residentValue == false) {
+									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										event.setCancelled(true);
+										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+										return;
+									}
+								}
+								if(residentValue == true) {
+									return;
+								}
+							}
+						}
+						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+							event.setCancelled(true);
+							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+							return;
+						}	
+					}
+					else {
+						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+							event.setCancelled(true);
+							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
+							return;
+						}	
+					}	
+				}
+			}
+		}
+	}
+	
+	
 	// Deny interacting with item frames
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGH)
@@ -1819,11 +1969,29 @@ public class ResListeners implements Listener{
 	}
 	
 	// Deny breaking certain entities
+	// And breaking item frames with arrows, popping items off with bows from item frames
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerInteractEntity(EntityDamageByEntityEvent event) {
-		if(!(event.getDamager() instanceof Player)) return;
-		Player player = (Player) event.getDamager();
+		// Item frame stuff
+		boolean isItemFrame = false;
+		if(!(event.getDamager() instanceof Player)) {
+			if(!(event.getEntity() instanceof ItemFrame)) return;
+			Projectile proj = (Projectile) event.getDamager();
+			if(proj.getShooter() instanceof Player) {
+				isItemFrame = true;
+			}
+			else {
+				return;
+			}
+		}
+		Player player = null;
+		if(isItemFrame) {
+			player = (Player) ((Projectile)event.getDamager()).getShooter();
+		}
+		else {
+			player = (Player) event.getDamager();
+		}
 		Entity entity = event.getEntity();
 		Location loc = entity.getLocation();
 		Residence res = Residence.getResidence(loc);
@@ -1851,6 +2019,9 @@ public class ResListeners implements Listener{
 								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 								if(residentValue == false) {
 									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										if(isItemFrame) {
+											event.getDamager().remove();
+										}
 										event.setCancelled(true);
 										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 										return;
@@ -1864,6 +2035,9 @@ public class ResListeners implements Listener{
 								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 								if(residentValue == false) {
 									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										if(isItemFrame) {
+											event.getDamager().remove();
+										}
 										event.setCancelled(true);
 										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 										return;
@@ -1875,6 +2049,9 @@ public class ResListeners implements Listener{
 							}
 						}
 						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+							if(isItemFrame) {
+								event.getDamager().remove();
+							}
 							event.setCancelled(true);
 							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 							return;
@@ -1882,6 +2059,9 @@ public class ResListeners implements Listener{
 					}
 					else {
 						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+							if(isItemFrame) {
+								event.getDamager().remove();
+							}
 							event.setCancelled(true);
 							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 							return;
@@ -1895,6 +2075,9 @@ public class ResListeners implements Listener{
 							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 							if(residentValue == false) {
 								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									if(isItemFrame) {
+										event.getDamager().remove();
+									}
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 									return;
@@ -1908,6 +2091,9 @@ public class ResListeners implements Listener{
 							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 							if(residentValue == false) {
 								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									if(isItemFrame) {
+										event.getDamager().remove();
+									}
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 									return;
@@ -1919,6 +2105,9 @@ public class ResListeners implements Listener{
 						}
 					}
 					if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+						if(isItemFrame) {
+							event.getDamager().remove();
+						}
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
 						return;
@@ -1926,6 +2115,9 @@ public class ResListeners implements Listener{
 				}
 				else {
 					if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+						if(isItemFrame) {
+							event.getDamager().remove();
+						}
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
 						return;
@@ -1942,6 +2134,9 @@ public class ResListeners implements Listener{
 								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 								if(residentValue == false) {
 									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										if(isItemFrame) {
+											event.getDamager().remove();
+										}
 										event.setCancelled(true);
 										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 										return;
@@ -1955,6 +2150,9 @@ public class ResListeners implements Listener{
 								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 								if(residentValue == false) {
 									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+										if(isItemFrame) {
+											event.getDamager().remove();
+										}
 										event.setCancelled(true);
 										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 										return;
@@ -1966,6 +2164,9 @@ public class ResListeners implements Listener{
 							}
 						}
 						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+							if(isItemFrame) {
+								event.getDamager().remove();
+							}
 							event.setCancelled(true);
 							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 							return;
@@ -1973,6 +2174,9 @@ public class ResListeners implements Listener{
 					}
 					else {
 						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+							if(isItemFrame) {
+								event.getDamager().remove();
+							}
 							event.setCancelled(true);
 							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 							return;
@@ -1986,6 +2190,9 @@ public class ResListeners implements Listener{
 							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 							if(residentValue == false) {
 								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									if(isItemFrame) {
+										event.getDamager().remove();
+									}
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 									return;
@@ -1999,6 +2206,9 @@ public class ResListeners implements Listener{
 							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
 							if(residentValue == false) {
 								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									if(isItemFrame) {
+										event.getDamager().remove();
+									}
 									event.setCancelled(true);
 									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
 									return;
@@ -2010,6 +2220,9 @@ public class ResListeners implements Listener{
 						}
 					}
 					if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+						if(isItemFrame) {
+							event.getDamager().remove();
+						}
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
 						return;
@@ -2017,6 +2230,9 @@ public class ResListeners implements Listener{
 				}
 				else {
 					if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+						if(isItemFrame) {
+							event.getDamager().remove();
+						}
 						event.setCancelled(true);
 						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
 						return;
@@ -2185,9 +2401,6 @@ public class ResListeners implements Listener{
 	}
 	
 	
-	
-	
-	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onPlayerChat(AsyncPlayerChatEvent event) {
 		Player player = event.getPlayer();
@@ -2204,7 +2417,7 @@ public class ResListeners implements Listener{
 				if(residents != null) {
 					for(int i = 0; i < residents.size(); i++) {
 						OfflinePlayer resident = Bukkit.getOfflinePlayer(residents.get(i));
-						Methods.removeResidentPerms(resident.getName(), res);
+						Methods.removeResidentPerms(resident.getUniqueId(), res);
 					}
 				}
 				Main.deletePlayerResidence(player.getUniqueId(), res);
@@ -2234,13 +2447,13 @@ public class ResListeners implements Listener{
 			event.setCancelled(true);
 			if(message.equalsIgnoreCase("done")) {
 				event.setMessage(null);
-				if(Commands.block1.containsKey(player) == false || Commands.block2.containsKey(player) == false) {
+				if(Commands.block1.containsKey(player.getUniqueId()) == false || Commands.block2.containsKey(player.getUniqueId()) == false) {
 					player.sendMessage(Utils.normal(Commands.pluginPrefix+"&cYou must select 2 points to set a new area!"));
 					return;
 				}
 				Residence playerRes = userInAreaSelectionResidence.get(player.getName());
-				Location b1Loc = Commands.block1.get(player).getLocation();
-				Location b2Loc = Commands.block2.get(player).getLocation();
+				Location b1Loc = Commands.block1.get(player.getUniqueId()).getLocation();
+				Location b2Loc = Commands.block2.get(player.getUniqueId()).getLocation();
 				Cuboid newArea = new Cuboid(b1Loc, b2Loc);
 				int maxArea = Methods.getPlayerDefaultAreaSize(player);
 				if(newArea.getBlocks().size() >= maxArea) {
@@ -2252,8 +2465,8 @@ public class ResListeners implements Listener{
 				Residence.saveResidenceData(player.getUniqueId(), playerRes, true, index);
 				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&aYour new residence area has been set"));
 				userInAreaSelection.put(player.getName(), false);
-				Commands.block1.remove(player);
-				Commands.block2.remove(player);	
+				Commands.block1.remove(player.getUniqueId());
+				Commands.block2.remove(player.getUniqueId());	
 				if(Listeners.task1 != null) {
 					Listeners.task1.cancel();
 				}
@@ -2268,8 +2481,8 @@ public class ResListeners implements Listener{
 				event.setMessage(null);
 				userInAreaSelection.put(player.getName(), false);
 				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&eResidence area creation has been cancelled"));
-				Commands.block1.remove(player);
-				Commands.block2.remove(player);
+				Commands.block1.remove(player.getUniqueId());
+				Commands.block2.remove(player.getUniqueId());
 				if(Listeners.task1 != null) {
 					Listeners.task1.cancel();
 				}

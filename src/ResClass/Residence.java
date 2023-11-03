@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -525,8 +527,21 @@ public class Residence {
 	 * @return True or false
 	 */
 	public boolean blockInResidence(Block block) {
-		List<Block> blocks = Area.getBlocks();
-		return blocks.contains(block);
+		return Area.contains(block);
+	}
+	
+	/**
+	 * Return blocks that are in a residence in specific chunks
+	 * @param chunks - Chunk list
+	 * @param res - Residence
+	 * @return Block list
+	 */
+	public static List<Block> getBlocksFromChunks(List<Chunk> chunks, Residence res){
+		List<Block> resBlocks = res.getArea().getBlocks();
+		for(Chunk chunk : chunks) {
+			resBlocks.removeIf(block -> !block.getChunk().equals(chunk));
+		}
+		return resBlocks;
 	}
 	
 	/**
@@ -601,6 +616,42 @@ public class Residence {
 	 * @return Updated Residence
 	 */
 	public static Residence removeResident(Player owner, Player removingPlayer, Residence res) {
+		int index = 0;
+		LinkedList<Residence> residences = Residence.getResidences(owner);
+		LinkedList<Residence> newResidences = new LinkedList<>();
+		if(residences != null) {
+			for(int i = 0; i < residences.size(); i++) {
+				Residence r = residences.get(i);
+				if(r.getName().equalsIgnoreCase(res.getName())) {
+					index = i;
+					continue;
+				}
+				newResidences.add(r);
+			}	
+		}
+		List<UUID> residents = res.getResidents();
+		residents.remove(removingPlayer.getUniqueId());
+		if(residents == null || residents.isEmpty()) {
+			List<UUID> newRes = null;
+			res.setResidents(newRes);
+			newResidences.add(index, res);
+			MasterList.put(owner.getUniqueId(), newResidences);
+			return res;
+		}
+		res.setResidents(residents);
+		newResidences.add(index, res);
+		MasterList.put(owner.getUniqueId(), newResidences);
+		return res;
+	}
+	
+	/**
+	 * Remove a resident from a residence
+	 * @param owner - Player who owns the Residence
+	 * @param removingPlayer - Player who is getting removed
+	 * @param res - Residence
+	 * @return Updated Residence
+	 */
+	public static Residence removeResident(Player owner, OfflinePlayer removingPlayer, Residence res) {
 		int index = 0;
 		LinkedList<Residence> residences = Residence.getResidences(owner);
 		LinkedList<Residence> newResidences = new LinkedList<>();
@@ -859,10 +910,10 @@ public class Residence {
 	@Override
 	public String toString() {
 		if(Residents == null) {
-			return Name + "/" + Area.toString() + "/" + Owner + "/null";
+			return Name + "/" + Area.toString() + "/null";
 		}
 		String toReturn = "";
-		toReturn += Name + "/" + Area.toString() + "/" + Owner + "/";
+		toReturn += Name + "/" + Area.toString() + "/";
 		for(UUID p : Residents) {
 			toReturn += p + "/";
 		}

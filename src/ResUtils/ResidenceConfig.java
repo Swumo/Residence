@@ -24,7 +24,7 @@ public class ResidenceConfig {
 		config.addDefault("particleColour", "White");
 		config.addDefault("playerDefaultAreaSize", 4000);
 		config.addDefault("maxResidences", 5);
-		config.addDefault("protectOnlyWhileOffline", true);
+		config.addDefault("protectOnlyWhileOffline", false);
 		config.options().copyDefaults(true);
 		plugin.saveConfig();
 		plugin.reloadConfig();

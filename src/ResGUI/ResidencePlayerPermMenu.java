@@ -27,14 +27,6 @@ public class ResidencePlayerPermMenu {
 	public static void updateInventory(final Player player, Residence res) {
     	Inventory inv = player.getOpenInventory().getTopInventory();
     	if(inv != null) {
-    		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-    		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
-    		for(int i = 0; i < rows; i++) {
-    			if(inv.getItem(i) == null) {
-    				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
-    			}
-    			else continue;
-    		}
     		
     		List<UUID> residents = res.getResidents();
     		
@@ -44,6 +36,14 @@ public class ResidencePlayerPermMenu {
     				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l &l ");
     			}
     			Utils.createItem(inv, Material.ARROW, 1, 10, Utils.normal("&cBack"));
+    			Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+        		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+//        		for(int i = 0; i < rows; i++) {
+//        			if(inv.getItem(i) == null) {
+//        				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+//        			}
+//        			else continue;
+//        		}
     			toReturn.setContents(inv.getContents());
     			return;
     		}
@@ -53,8 +53,13 @@ public class ResidencePlayerPermMenu {
     		if(residents.size() > 35) rows = 6 * 9;
     		
     		for(int i = 0; i < residents.size(); i++) {
-				Player player1 = Bukkit.getOfflinePlayer(residents.get(i)).getPlayer();
-				Utils.createPlayerHead(inv, player1, 1, i+1, "&b"+player1.getName(), "&7&oClick to edit players permissions");
+				OfflinePlayer player1 = Bukkit.getOfflinePlayer(residents.get(i));
+				if(player1.isOnline()) {
+					Utils.createPlayerHead(inv, player1, 1, i+1, "&b"+player1.getName(), "&7&oClick to edit players permissions");	
+				}
+				else {
+					Utils.createItem(inv, Material.PLAYER_HEAD, 1, i+1, "&b"+player1.getName(), "&7&oClick to edit players permissions");
+				}
 			}	
 			//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
 			for(int i = residents.size(); i < rows; i++) {
@@ -76,6 +81,14 @@ public class ResidencePlayerPermMenu {
 			default:
 				Utils.createItem(inv, Material.ARROW, 1, 10, Utils.normal("&cBack"));
 			}
+			Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+    		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+    		for(int i = 0; i < rows; i++) {
+    			if(inv.getItem(i) == null) {
+    				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+    			}
+    			else continue;
+    		}
     		toReturn.setContents(inv.getContents());
     	}
 	}
@@ -83,14 +96,6 @@ public class ResidencePlayerPermMenu {
 	
 
 	public static Inventory GUI(Player player, Residence res) {
-		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
-		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
-		for(int i = 0; i < rows; i++) {
-			if(inv.getItem(i) == null) {
-				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
-			}
-			else continue;
-		}
 		
 		List<UUID> residents = res.getResidents();
 		
@@ -100,6 +105,14 @@ public class ResidencePlayerPermMenu {
 				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l &l ");
 			}
 			Utils.createItem(inv, Material.ARROW, 1, 10, Utils.normal("&cBack"));
+			Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+			//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+			for(int i = 0; i < rows; i++) {
+				if(inv.getItem(i) == null) {
+					Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+				}
+				else continue;
+			}
 			toReturn.setContents(inv.getContents());
 			return toReturn;
 		}
@@ -108,9 +121,23 @@ public class ResidencePlayerPermMenu {
 		if(residents.size() > 26) rows = 5 * 9;
 		if(residents.size() > 35) rows = 6 * 9;
 		
+		Inventory toReturn = Bukkit.createInventory(null, rows, gui_name);
+		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
+		for(int i = 0; i < rows; i++) {
+			if(inv.getItem(i) == null) {
+				Utils.createItem(inv, Material.BLACK_STAINED_GLASS_PANE, 1, i+1, " &l  &l ");
+			}
+			else continue;
+		}
+		
 		for(int i = 0; i < residents.size(); i++) {
 			OfflinePlayer player1 = Bukkit.getOfflinePlayer(residents.get(i));
-			Utils.createPlayerHead(inv, player1, 1, i+1, "&b"+player1.getName(), "&7&oClick to edit players permissions");
+			if(player1.isOnline()) {
+				Utils.createPlayerHead(inv, player1, 1, i+1, "&b"+player1.getName(), "&7&oClick to edit players permissions");	
+			}
+			else {
+				Utils.createItem(inv, Material.PLAYER_HEAD, 1, i+1, "&b"+player1.getName(), "&7&oClick to edit players permissions");
+			}
 		}	
 		//	Inventory | ItemID | (DataID) | Amount | Slot | Name | Lore
 		for(int i = residents.size(); i < rows; i++) {
@@ -143,6 +170,7 @@ public class ResidencePlayerPermMenu {
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	public static void clicked(Player player, int slot, ItemStack clicked, Inventory inv) {
 		if(clicked.getType() == Material.BLACK_STAINED_GLASS_PANE) { 
 			updateInventory(player, ResidenceMainMenu.selectedResidence.get(player.getUniqueId()));
@@ -155,7 +183,7 @@ public class ResidencePlayerPermMenu {
 		}
 		else {
 			String playerToEditName = ChatColor.stripColor(clicked.getItemMeta().getDisplayName());
-			Player editing = Bukkit.getPlayer(playerToEditName);
+			OfflinePlayer editing = Bukkit.getOfflinePlayer(playerToEditName);
 			player.closeInventory();
 			ResidencePlayerEditMenu.openInv(player, editing, ResidenceMainMenu.selectedResidence.get(player.getUniqueId()));
 			return;
