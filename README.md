@@ -26,6 +26,10 @@ This project has no relation to the Residence plugin available on Spigot! No cod
 
 - Ability to disable specific commands!
 
+- Ability to toggle specific rules on/off
+
+- Ability to disable/enable rules globally
+
 - And much more!
 
 ### Commands
