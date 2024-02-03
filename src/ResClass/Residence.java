@@ -113,7 +113,6 @@ public class Residence {
 		this.pitch = pitch;
 	}
 
-	
 	/**
 	 * Get Residence area
 	 * @return Cuboid

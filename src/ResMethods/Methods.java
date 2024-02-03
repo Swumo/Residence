@@ -203,6 +203,26 @@ public class Methods {
 		messages.getConfigField("Commands.AdminSetResidenceOwn", "&aYou have set &e%name%'s &anew max Residence count to &e%count%&a!");
 		messages.getConfigField("Commands.MaxClaimBlocks", "&aYour maximum amount of claimable blocks is &e%amount%&a!");
 		messages.getConfigField("Commands.MaxResidences", "&aYour maximum amount of Residences is &e%amount%&a!");
+		// General messages
+		messages.getConfigField("General.NOTallowBlockPlacing", "&cYou cannot place blocks in this Residence!");
+		messages.getConfigField("General.NOTallowTNTPlacing", "&cYou cannot place TNT near this Residence!");
+		messages.getConfigField("General.NOTallowBlockBreaking", "&cYou cannot break blocks in this Residence!");
+		messages.getConfigField("General.NOTallowEntering", "&cYou are not allowed to enter this Residence!");
+		messages.getConfigField("General.NOTallowBlockInteraction", "&cYou cannot interact with blocks in this Residence!");
+		messages.getConfigField("General.NOTallowDamageEntities", "&cYou cannot damage entities in this Residence!");
+		messages.getConfigField("General.NOTallowEntityInteraction", "&cYou cannot interact with entities in this Residence!");
+		messages.getConfigField("General.NOTallowVehicleDestroy", "&cYou cannot destroy vehicles in this Residence!");
+		messages.getConfigField("General.ResDeleted", "&aYour Residence has been deleted");
+		messages.getConfigField("General.ResDeletionCancelled", "&eResidence deletion has been cancelled");
+		messages.getConfigField("General.TypeYesNo", "&cYou must type only &aYes &cor &4No");
+		messages.getConfigField("General.TwoPoints", "&cYou must select 2 points to set a new area!");
+		messages.getConfigField("General.ResAreaTooBig", "&cYour new Residence area is too big! Please select a new area");
+		messages.getConfigField("General.ResAreaSet", "&aYour new Residence area has been set");
+		messages.getConfigField("General.ResAreaCancelled", "&eResidence area creation has been cancelled");
+		messages.getConfigField("General.TypeDoneCancel", "&cYou must type only &aDone &cor &4Cancel");
+		
+		
+		
 	}
 	
 	/*
@@ -299,9 +319,9 @@ public class Methods {
 	 * Remove LuckPerm permission nodes, except for Meta ones, which have the Particle Colour, the default area size and the max amount of residences
 	 * @param player - Player
 	 */
-	public static void removePermissionsExceptMeta(Player player) {
+	public static void removePermissionsExceptMeta(OfflinePlayer player) {
 		LuckPerms api = Main.getLP();
-		User user = api.getUserManager().getUser(player.getName());
+		User user = getUserFromOfflinePlayer(player.getUniqueId());
 		List<Node> nodes = (List<Node>) user.getNodes();
 		for(int i = 0; i < nodes.size(); i++) {
 			Node node = nodes.get(i);

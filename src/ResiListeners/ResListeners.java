@@ -32,6 +32,7 @@ import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -45,6 +46,7 @@ import ResCommands.Commands;
 import ResMain.Main;
 import ResMethods.Methods;
 import ResUtils.Cuboid;
+import ResUtils.CustomFile;
 import ResUtils.MessageUtil;
 import ResUtils.Utils;
 import net.luckperms.api.LuckPerms;
@@ -52,8 +54,6 @@ import net.luckperms.api.model.user.User;
 import net.md_5.bungee.api.ChatColor;
 
 public class ResListeners implements Listener{
-
-	@SuppressWarnings("unused")
 	private final Main plugin;
 	
 	public ResListeners(Main plugin) {
@@ -69,7 +69,7 @@ public class ResListeners implements Listener{
 	public static HashMap<String, String> playerWasInResidence = new HashMap<>();
 	private static MessageUtil messageUtil = Main.getMessageUtil();
 	private static final List<EntityType> entityBreak = Arrays.stream(EntityType.values()).filter(mat -> mat.name().contains("MINECART") 
-			|| mat.name().contains("FRAME") || mat.name().contains("BOAT") || mat.name().contains("")).toList();
+			|| mat.name().contains("FRAME") || mat.name().contains("BOAT") || mat.name().contains("ARMOR_STAND") || mat.name().contains("")).toList();
 //	private static final List<EntityType> entityBreak = Arrays.asList(
 //			EntityType.BOAT, EntityType.ITEM_FRAME, EntityType.ARMOR_STAND, EntityType.MINECART, 
 //			EntityType.MINECART_CHEST, EntityType.MINECART_COMMAND, EntityType.MINECART_FURNACE, 
@@ -120,10 +120,10 @@ public class ResListeners implements Listener{
 	public static HashMap<String, Residence> userInAreaSelectionResidence = new HashMap<>();
 	public static HashMap<String, Boolean> userLaunched = new HashMap<>();
 	public static HashMap<Residence, Boolean> residenceDenyDamage = new HashMap<>();
+	private static CustomFile messages = Main.getMessagesFile();
 	
 	
 	
-	@SuppressWarnings("deprecation")
 	// Denying block placing in residence
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockPlace(BlockPlaceEvent event) {
@@ -148,104 +148,112 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				List<UUID> residents = res.getResidents();
-				if(residents != null) {
-					if(residents.contains(player.getUniqueId())) {
-						boolean residentValue = false;
-						if(offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockPlacing", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-						if(owner == null && offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockPlacing", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}
-						}
-					}
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-						return;
-					}
-				}
-				if(residents == null){
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) { 
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-						return;
-					}	
-				}	
+			boolean cancelEvent = handleEvent(player, block, res, owner, offOwner, "allowBlockPlacing");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
-			if(Main.protectOnlyWhileOffline == false) {
-				List<UUID> residents = res.getResidents();
-				if(residents != null) {
-					if(residents.contains(player.getUniqueId())) {
-						boolean residentValue = false;
-						if(owner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockPlacing", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-						if(owner == null && offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockPlacing", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) { 
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
+		}
+	}
+
+	private boolean handleEvent(Player player, Block block, Residence res, Player owner,
+			OfflinePlayer offOwner, String rule) {
+		if(Main.protectOnlyWhileOffline == true) {
+			List<UUID> residents = res.getResidents();
+			if(residents != null) {
+				if(residents.contains(player.getUniqueId())) {
+					boolean residentValue = false;
+					if(offOwner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
 							}
 						}
+						if(residentValue == true) {
+							return false;
+						}	
 					}
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-						return;
+					if(owner == null && offOwner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}
 					}
 				}
-				if(residents == null){
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot place blocks in this residence!"));
-						return;
-					}	
-				}	
-			}	
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}
+			}
+			if(residents == null){
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}
+				else if(res.blockInResidence(block) == true && res.isOwner(player) == true){
+					return false;
+				}
+			}
+			return false;
 		}
+		if(Main.protectOnlyWhileOffline == false) {
+			List<UUID> residents = res.getResidents();
+			if(residents != null) {
+				if(residents.contains(player.getUniqueId())) {
+					boolean residentValue = false;
+					if(owner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}	
+					}
+					if(owner == null && offOwner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) { 
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}
+					}
+				}
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}
+			}
+			if(residents == null){
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}
+				else if(res.blockInResidence(block) == true && res.isOwner(player) == true){
+					return false;
+				}
+			}
+			return false;
+		}
+		return false;
 	}
 	
 	
 	// Handle tnt placing
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onTntPlace(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
@@ -293,179 +301,174 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				// IF TNT AREA IS NULL BUT RES IS NOT NULL
-				if(tntArea == null && res != null) {
-					List<UUID> residents = res.getResidents();
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowTNTPlacing", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner.getName(), "allowTNTPlacing", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-							return;
-						}
-					}
-					if(residents == null){
-						if(res.blockInResidence(block) == true) {
-							if(res.isOwner(player) == false) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-								return;
-							}
-						}
-					}
-				}
-				//
-				// IF TNT AREA AND RES ARE NOT NULL
-				List<UUID> residents = res.getResidents();
-				if(residents != null) {
-					if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
-						if(res.isOwner(player) == false) {
-							if(!residents.contains(player.getUniqueId())) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-								return;
-							}
-							boolean residentVal = Methods.checkIfResidentCan(player, offOwner.getName(), "allowTNTPlacing", res);
-							if(residentVal == true) {
-								return;
-							}
-							if(residentVal == false) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-								return;
-							}
-						}
-					}
-				}
-				if(residents == null){
-					if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
-						if(res.isOwner(player) == false) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-							return;
-						}
-					}
-				}
-				//
-			}
-			if(Main.protectOnlyWhileOffline == false) {
-				// IF TNT AREA IS NULL BUT RES IS NOT NULL
-				if(tntArea == null && res != null) {
-					List<UUID> residents = res.getResidents();
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowTNTPlacing", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner.getName(), "allowTNTPlacing", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-							return;
-						}
-					}
-					if(residents == null){
-						if(res.blockInResidence(block) == true) {
-							if(res.isOwner(player) == false) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-								return;
-							}
-						}
-					}
-				}
-				//
-				// IF TNT AREA AND RES ARE NOT NULL
-				List<UUID> residents = res.getResidents();
-				if(residents != null) {
-					if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
-						if(res.isOwner(player) == false) {
-							if(!residents.contains(player.getUniqueId())) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-								return;
-							}
-							boolean residentVal = Methods.checkIfResidentCan(player, offOwner.getName(), "allowTNTPlacing", res);
-							if(residentVal == true) {
-								return;
-							}
-							if(residentVal == false) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-								return;
-							}
-						}
-					}
-				}
-				if(residents == null){
-					if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
-						if(res.isOwner(player) == false) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot place TNT near this residence!"));
-							return;
-						}
-					}
-				}
-				//
+			boolean cancelEvent = handleTNTPlacing(player, block, res, tntArea, owner, offOwner, "allowTNTPlacing");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
 		}
 	}
+
+
+	private boolean handleTNTPlacing(Player player, Block block, Residence res, Cuboid tntArea,
+			Player owner, OfflinePlayer offOwner, String rule) {
+		if(Main.protectOnlyWhileOffline == true) {
+			// IF TNT AREA IS NULL BUT RES IS NOT NULL
+			if(tntArea == null && res != null) {
+				List<UUID> residents = res.getResidents();
+				if(residents != null) {
+					if(residents.contains(player.getUniqueId())) {
+						boolean residentValue = false;
+						if(offOwner != null) {
+							residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+							if(residentValue == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
+								}
+							}
+							if(residentValue == true) {
+								return false;
+							}	
+						}
+						if(owner == null && offOwner != null) {
+							residentValue = Methods.checkIfResidentCan(player, offOwner.getName(), rule, res);
+							if(residentValue == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
+								}
+							}
+							if(residentValue == true) {
+								return false;
+							}
+						}
+					}
+					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}
+				}
+				if(residents == null){
+					if(res.blockInResidence(block) == true) {
+						if(res.isOwner(player) == false) {
+							player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+							return false;
+						}
+					}
+				}
+			}
+			//
+			// IF TNT AREA AND RES ARE NOT NULL
+			List<UUID> residents = res.getResidents();
+			if(residents != null) {
+				if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
+					if(res.isOwner(player) == false) {
+						if(!residents.contains(player.getUniqueId())) {
+							player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+							return true;
+						}
+						boolean residentVal = Methods.checkIfResidentCan(player, offOwner.getName(), rule, res);
+						if(residentVal == true) {
+							return false;
+						}
+						if(residentVal == false) {
+							player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+							return true;
+						}
+					}
+				}
+			}
+			if(residents == null){
+				if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
+					if(res.isOwner(player) == false) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}
+				}
+			}
+			//
+		}
+		if(Main.protectOnlyWhileOffline == false) {
+			// IF TNT AREA IS NULL BUT RES IS NOT NULL
+			if(tntArea == null && res != null) {
+				List<UUID> residents = res.getResidents();
+				if(residents != null) {
+					if(residents.contains(player.getUniqueId())) {
+						boolean residentValue = false;
+						if(owner != null) {
+							residentValue = Methods.checkIfResidentCan(player, owner, rule, res);
+							if(residentValue == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
+								}
+							}
+							if(residentValue == true) {
+								return false;
+							}	
+						}
+						if(owner == null && offOwner != null) {
+							residentValue = Methods.checkIfResidentCan(player, offOwner.getName(), rule, res);
+							if(residentValue == false) {
+								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
+								}
+							}
+							if(residentValue == true) {
+								return false;
+							}
+						}
+					}
+					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}
+				}
+				if(residents == null){
+					if(res.blockInResidence(block) == true) {
+						if(res.isOwner(player) == false) {
+							player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+							return true;
+						}
+					}
+				}
+			}
+			//
+			// IF TNT AREA AND RES ARE NOT NULL
+			List<UUID> residents = res.getResidents();
+			if(residents != null) {
+				if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
+					if(res.isOwner(player) == false) {
+						if(!residents.contains(player.getUniqueId())) {
+							player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+							return true;
+						}
+						boolean residentVal = Methods.checkIfResidentCan(player, offOwner.getName(), rule, res);
+						if(residentVal == true) {
+							return false;
+						}
+						if(residentVal == false) {
+							player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+							return true;
+						}
+					}
+				}
+			}
+			if(residents == null){
+				if(res.blockInResidence(block) == true || tntArea.contains(block) == true) {
+					if(res.isOwner(player) == false) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}
+				}
+			}
+			//
+		}
+		return true;
+	}
 	
 	// Denying block breaking in a residence
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
@@ -488,103 +491,15 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				List<UUID> residents = res.getResidents();
-				if(residents != null) {
-					if(residents.contains(player.getUniqueId())) {
-						boolean residentValue = false;
-						if(offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockBreaking", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-						if(owner == null && offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockBreaking", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-					}
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-						return;
-					}
-				}
-				else {
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-						return;
-					}	
-				}
-			}
-			if(Main.protectOnlyWhileOffline == false) {
-				List<UUID> residents = res.getResidents();
-				if(residents != null) {
-					if(residents.contains(player.getUniqueId())) {
-						boolean residentValue = false;
-						if(owner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockBreaking", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-						if(owner == null && offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockBreaking", res);
-							if(residentValue == false) {
-								if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-					}
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-						return;
-					}
-				}
-				else {
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot break blocks in this residence!"));
-						return;
-					}	
-				}
+			boolean cancelEvent = handleEvent(player, block, res, owner, offOwner, "allowBlockBreaking");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
 		}
 	}
 	
 	// Loading player residence on join
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		LinkedList<Residence> saved = Residence.getResidences(player);
@@ -632,7 +547,7 @@ public class ResListeners implements Listener{
 	
 	
 	// Removing positions on leave
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerLeave(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		LuckPerms api = Main.getLP();
@@ -646,8 +561,7 @@ public class ResListeners implements Listener{
 	
 	
 	// Sending greeting/farewell messages
-	@SuppressWarnings("deprecation")
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		if(playerInResidence.get(player.getName()) == null) return;
@@ -994,7 +908,7 @@ public class ResListeners implements Listener{
 	
 	
 	// Handle fall damage when player was launched away from a residence
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onEntityDamage(EntityDamageEvent event) {
 		if(!(event.getEntity() instanceof Player)) return;
 		Player player = (Player) event.getEntity();
@@ -1026,8 +940,7 @@ public class ResListeners implements Listener{
 	
 	
 	// Deny placing/removing of certain entities
-	@SuppressWarnings("deprecation")
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Action action = event.getAction();
 		Player player = event.getPlayer();
@@ -1061,671 +974,302 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				List<UUID> residents = res.getResidents();
-				// BUCKETS ETC
-				if(items.contains(hand1.getType()) || items.contains(hand2.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}
-					}
-				}
-				// FURNACES CHESTS ETC
-				if(interactiveBlocks.contains(block.getType())) {
-					if(res.isOwner(player)) {
-						return;
-					}
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}
-					}		
-				}
-				// BUTTONS AND ETC
-				if(residents == null) {
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-						if(action.equals(Action.PHYSICAL)) {
-							if(block.getType() == Material.FARMLAND) {
-								event.setCancelled(true);
-								return;
-							}
-							if(block.getType().name().contains("PRESSURE")) {
-								event.setCancelled(true);
-								return;
-							}
-						}
-						if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-							if(physicalBlocks.contains(block.getType())) {
-								event.setCancelled(true);
-								return;
-							}
-						}
-					}	
-				}
-				if(residents != null) {
-					if(res.blockInResidence(block) && res.isOwner(player) == false) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-									}
-								}
-								if(residentValue == true) {
-									if(action.equals(Action.PHYSICAL)) {
-										if(block.getType() == Material.FARMLAND) {
-											event.setCancelled(true);
-											return;
-										}
-									}
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-						}	
-					}
-				}
-			}
-			if(Main.protectOnlyWhileOffline == false) {
-				List<UUID> residents = res.getResidents();
-				// BUCKETS ETC
-				if(items.contains(hand1.getType()) || items.contains(hand2.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}
-					}
-				}
-				// FURNACES CHESTS ETC
-				if(interactiveBlocks.contains(block.getType())) {
-					if(res.isOwner(player)) {
-						return;
-					}
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with blocks in this residence!"));
-							return;
-						}
-					}		
-				}
-				// BUTTONS AND ETC
-				if(residents == null) {
-					if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-						if(action.equals(Action.PHYSICAL)) {
-							if(block.getType() == Material.FARMLAND) {
-								event.setCancelled(true);
-								return;
-							}
-							if(block.getType().name().contains("PRESSURE")) {
-								event.setCancelled(true);
-								return;
-							}
-						}
-						if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-							if(physicalBlocks.contains(block.getType())) {
-								event.setCancelled(true);
-								return;
-							}
-						}
-					}	
-				}
-				if(residents != null) {
-					if(res.blockInResidence(block) && res.isOwner(player) == false) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-									}
-								}
-								if(residentValue == true) {
-									if(action.equals(Action.PHYSICAL)) {
-										if(block.getType() == Material.FARMLAND) {
-											event.setCancelled(true);
-											return;
-										}
-									}
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowBlockInteraction", res);
-								if(residentValue == false) {
-									if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
-										if(action.equals(Action.PHYSICAL)) {
-											if(block.getType() == Material.FARMLAND) {
-												event.setCancelled(true);
-												return;
-											}
-											if(block.getType().name().contains("PRESSURE")) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-										if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-											if(physicalBlocks.contains(block.getType())) {
-												event.setCancelled(true);
-												return;
-											}
-										}
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-						}
-						if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(action.equals(Action.PHYSICAL)) {
-								if(block.getType() == Material.FARMLAND) {
-									event.setCancelled(true);
-									return;
-								}
-								if(block.getType().name().contains("PRESSURE")) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-							if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
-								if(physicalBlocks.contains(block.getType())) {
-									event.setCancelled(true);
-									return;
-								}
-							}
-						}	
-					}
-				}
+			boolean cancelEvent = handleEvent(action, player, block, res, hand1, hand2, owner, offOwner, "allowBlockInteraction");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
 		}
 	}
+
+	private boolean handleEvent(Action action, Player player, Block block, Residence res,
+			ItemStack hand1, ItemStack hand2, Player owner, OfflinePlayer offOwner, String rule) {
+		List<UUID> residents = res.getResidents();
+		// BUCKETS ETC
+		if(items.contains(hand1.getType()) || items.contains(hand2.getType())) {
+			if(residents != null) {
+				if(residents.contains(player.getUniqueId())) {
+					boolean residentValue = false;
+					if(owner != null) {
+						residentValue = Methods.checkIfResidentCan(player, owner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								if(action.equals(Action.PHYSICAL)) {
+									if(block.getType() == Material.FARMLAND) {
+										return true;
+									}
+									if(block.getType().name().contains("PRESSURE")) {
+										return true;
+									}
+								}
+								if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+									if(physicalBlocks.contains(block.getType())) {
+										return true;
+									}
+								}
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}
+					}
+					if(owner == null && offOwner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								if(action.equals(Action.PHYSICAL)) {
+									if(block.getType() == Material.FARMLAND) {
+										return true;
+									}
+									if(block.getType().name().contains("PRESSURE")) {
+										return true;
+									}
+								}
+								if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+									if(physicalBlocks.contains(block.getType())) {
+										return true;
+									}
+								}
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}	
+					}
+				}
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					if(action.equals(Action.PHYSICAL)) {
+						if(block.getType() == Material.FARMLAND) {
+							return true;
+						}
+						if(block.getType().name().contains("PRESSURE")) {
+							return true;
+						}
+					}
+					if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+						if(physicalBlocks.contains(block.getType())) {
+							return true;
+						}
+					}
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}	
+			}
+			else {
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+					if(action.equals(Action.PHYSICAL)) {
+						if(block.getType() == Material.FARMLAND) {
+							return true;
+						}
+						if(block.getType().name().contains("PRESSURE")) {
+							return true;
+						}
+					}
+					if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+						if(physicalBlocks.contains(block.getType())) {
+							return true;
+						}
+					}
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}
+			}
+		}
+		// FURNACES CHESTS ETC
+		if(interactiveBlocks.contains(block.getType())) {
+			if(res.isOwner(player)) {
+				return false;
+			}
+			if(residents != null) {
+				if(residents.contains(player.getUniqueId())) {
+					boolean residentValue = false;
+					if(owner != null) {
+						residentValue = Methods.checkIfResidentCan(player, owner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								if(action.equals(Action.PHYSICAL)) {
+									if(block.getType() == Material.FARMLAND) {
+										return true;
+									}
+									if(block.getType().name().contains("PRESSURE")) {
+										return true;
+									}
+								}
+								if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+									if(physicalBlocks.contains(block.getType())) {
+										return true;
+									}
+								}
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}	
+					}
+					if(owner == null && offOwner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								if(action.equals(Action.PHYSICAL)) {
+									if(block.getType() == Material.FARMLAND) {
+										return true;
+									}
+									if(block.getType().name().contains("PRESSURE")) {
+										return true;
+									}
+								}
+								if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+									if(physicalBlocks.contains(block.getType())) {
+										return true;
+									}
+								}
+								player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+								return true;
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}	
+					}
+				}
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					if(action.equals(Action.PHYSICAL)) {
+						if(block.getType() == Material.FARMLAND) {
+							return true;
+						}
+						if(block.getType().name().contains("PRESSURE")) {
+							return true;
+						}
+					}
+					if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+						if(physicalBlocks.contains(block.getType())) {
+							return true;
+						}
+					}
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}	
+			}
+			else {
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+					if(action.equals(Action.PHYSICAL)) {
+						if(block.getType() == Material.FARMLAND) {
+							return true;
+						}
+						if(block.getType().name().contains("PRESSURE")) {
+							return true;
+						}
+					}
+					if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+						if(physicalBlocks.contains(block.getType())) {
+							return true;
+						}
+					}
+					player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+					return true;
+				}
+			}		
+		}
+		// BUTTONS AND ETC
+		if(residents == null) {
+			if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+				if(action.equals(Action.PHYSICAL)) {
+					if(block.getType() == Material.FARMLAND) {
+						return true;
+					}
+					if(block.getType().name().contains("PRESSURE")) {
+						return true;
+					}
+				}
+				if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+					if(physicalBlocks.contains(block.getType())) {
+						return true;
+					}
+				}
+			}	
+		}
+		if(residents != null) {
+			if(res.blockInResidence(block) && res.isOwner(player) == false) {
+				if(residents.contains(player.getUniqueId())) {
+					boolean residentValue = false;
+					if(owner != null) {
+						residentValue = Methods.checkIfResidentCan(player, owner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								if(action.equals(Action.PHYSICAL)) {
+									if(block.getType() == Material.FARMLAND) {
+										return true;
+									}
+									if(block.getType().name().contains("PRESSURE")) {
+										return true;
+									}
+								}
+								if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+									if(physicalBlocks.contains(block.getType())) {
+										return true;
+									}
+								}
+							}
+						}
+						if(residentValue == true) {
+							if(action.equals(Action.PHYSICAL)) {
+								if(block.getType() == Material.FARMLAND) {
+									return true;
+								}
+							}
+							return false;
+						}	
+					}
+					if(owner == null && offOwner != null) {
+						residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+						if(residentValue == false) {
+							if(res.blockInResidence(block) == true && res.isOwner(player) == false) {
+								if(action.equals(Action.PHYSICAL)) {
+									if(block.getType() == Material.FARMLAND) {
+										return true;
+									}
+									if(block.getType().name().contains("PRESSURE")) {
+										return true;
+									}
+								}
+								if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+									if(physicalBlocks.contains(block.getType())) {
+										return true;
+									}
+								}
+							}
+						}
+						if(residentValue == true) {
+							return false;
+						}	
+					}
+				}
+				if(res.blockInResidence(block) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+					if(action.equals(Action.PHYSICAL)) {
+						if(block.getType() == Material.FARMLAND) {
+							return true;
+						}
+						if(block.getType().name().contains("PRESSURE")) {
+							return true;
+						}
+					}
+					if(action.equals(Action.RIGHT_CLICK_BLOCK)) {
+						if(physicalBlocks.contains(block.getType())) {
+							return true;
+						}
+					}
+				}	
+			}
+		}
+		return false;
+	}
 	
 	// Deny breaking item frames (with arrows)
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGH)
 	private void onHangingBreak(HangingBreakByEntityEvent event) {
 		if(!(event.getRemover() instanceof Player)) return;
@@ -1747,108 +1291,136 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				List<UUID> residents = res.getResidents();
-				if(entityBreak.contains(entity.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
-					}	
-				}
+			boolean cancelEvent = handleEvent(player, entity, res, owner, offOwner, "allowDamageEntities");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
-			if(Main.protectOnlyWhileOffline == false) {
-				List<UUID> residents = res.getResidents();
-				if(entityBreak.contains(entity.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
+		}
+	}
+
+	private boolean handleEvent(Player player, Entity entity, Residence res, Player owner,
+			OfflinePlayer offOwner, String rule) {
+		if(Main.protectOnlyWhileOffline == true) {
+			List<UUID> residents = res.getResidents();
+			if(entityBreak.contains(entity.getType())) {
+				if(residents != null) {
+					if(residents.contains(player.getUniqueId())) {
+						boolean residentValue = false;
+						if(offOwner != null) {
+							residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+							if(residentValue == false) {
+								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
 								}
-								if(residentValue == true) {
-									return;
-								}	
 							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
+							if(residentValue == true) {
+								return false;
+							}	
+						}
+						if(owner == null && offOwner != null) {
+							residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+							if(residentValue == false) {
+								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
 								}
-								if(residentValue == true) {
-									return;
-								}
+							}
+							if(residentValue == true) {
+								return false;
 							}
 						}
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
 					}
-					else {
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
+					if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
 					}	
 				}
+				else {
+					if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}	
+				}	
+			}
+		}
+		if(Main.protectOnlyWhileOffline == false) {
+			List<UUID> residents = res.getResidents();
+			if(entityBreak.contains(entity.getType())) {
+				if(residents != null) {
+					if(residents.contains(player.getUniqueId())) {
+						boolean residentValue = false;
+						if(owner != null) {
+							residentValue = Methods.checkIfResidentCan(player, owner, rule, res);
+							if(residentValue == false) {
+								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
+								}
+							}
+							if(residentValue == true) {
+								return false;
+							}	
+						}
+						if(owner == null && offOwner != null) {
+							residentValue = Methods.checkIfResidentCan(player, offOwner, rule, res);
+							if(residentValue == false) {
+								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+									player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+									return true;
+								}
+							}
+							if(residentValue == true) {
+								return false;
+							}
+						}
+					}
+					if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}	
+				}
+				else {
+					if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
+						player.sendMessage(Utils.normal(messages.getConfigField("General.NOT"+rule)));
+						return true;
+					}	
+				}	
+			}
+		}
+		return false;
+	}
+	
+	
+	// Deny interacting with armor stands
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onPlayerInteractAtEntity(PlayerInteractAtEntityEvent event) {
+		Player player = event.getPlayer();
+		Entity entity = event.getRightClicked();
+		Location loc = entity.getLocation();
+		Residence res = Residence.getResidence(loc);
+		if(res == null) return;
+		Player owner = Bukkit.getPlayer(res.getOwner());
+		OfflinePlayer offOwner = null;
+		if(owner == null) {
+			offOwner = Bukkit.getOfflinePlayer(res.getOwner());
+		}
+		if(Main.protectOnlyWhileOffline == true && owner != null) {
+			return;
+		}
+		boolean value = res.getAllowEntityInteraction();
+		if(value == true) {
+			return;
+		}
+		if(value == false) {
+			boolean cancelEvent = handleEvent(player, entity, res, owner, offOwner, "allowEntityInteraction");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
 		}
 	}
 	
-	
 	// Deny interacting with item frames
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
 		Player player = event.getPlayer();
@@ -1869,108 +1441,15 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				List<UUID> residents = res.getResidents();
-				if(entityBreak.contains(entity.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowEntityInteraction", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowEntityInteraction", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-							return;
-						}	
-					}	
-				}
-			}
-			if(Main.protectOnlyWhileOffline == false) {
-				List<UUID> residents = res.getResidents();
-				if(entityBreak.contains(entity.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowEntityInteraction", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, offOwner, "allowEntityInteraction", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot interact with entities in this residence!"));
-							return;
-						}	
-					}	
-				}
+			boolean cancelEvent = handleEvent(player, entity, res, owner, offOwner, "allowEntityInteraction");
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
 		}
 	}
 	
 	// Deny breaking certain entities
 	// And breaking item frames with arrows, popping items off with bows from item frames
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerInteractEntity(EntityDamageByEntityEvent event) {
 		// Item frame stuff
@@ -2009,242 +1488,19 @@ public class ResListeners implements Listener{
 			return;
 		}
 		if(value == false) {
-			if(Main.protectOnlyWhileOffline == true) {
-				List<UUID> residents = res.getResidents();
-				if(entityBreak.contains(entity.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										if(isItemFrame) {
-											event.getDamager().remove();
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										if(isItemFrame) {
-											event.getDamager().remove();
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(isItemFrame) {
-								event.getDamager().remove();
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-							if(isItemFrame) {
-								event.getDamager().remove();
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
-					}	
-				}
-				if(residents != null) {
-					if(residents.contains(player.getUniqueId())) {
-						boolean residentValue = false;
-						if(offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-							if(residentValue == false) {
-								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-									if(isItemFrame) {
-										event.getDamager().remove();
-									}
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-						if(owner == null && offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-							if(residentValue == false) {
-								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-									if(isItemFrame) {
-										event.getDamager().remove();
-									}
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}
-						}
-					}
-					if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-						if(isItemFrame) {
-							event.getDamager().remove();
-						}
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
-						return;
-					}	
-				}
-				else {
-					if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-						if(isItemFrame) {
-							event.getDamager().remove();
-						}
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
-						return;
-					}	
-				}
+			boolean cancelEvent = handleEvent(player, entity, res, owner, offOwner, "allowDamageEntities");
+			if(cancelEvent && isItemFrame) {
+				event.setCancelled(true);
+				event.getDamager().remove();
 			}
-			if(Main.protectOnlyWhileOffline == false) {
-				List<UUID> residents = res.getResidents();
-				if(entityBreak.contains(entity.getType())) {
-					if(residents != null) {
-						if(residents.contains(player.getUniqueId())) {
-							boolean residentValue = false;
-							if(owner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										if(isItemFrame) {
-											event.getDamager().remove();
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}	
-							}
-							if(owner == null && offOwner != null) {
-								residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-								if(residentValue == false) {
-									if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-										if(isItemFrame) {
-											event.getDamager().remove();
-										}
-										event.setCancelled(true);
-										player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-										return;
-									}
-								}
-								if(residentValue == true) {
-									return;
-								}
-							}
-						}
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-							if(isItemFrame) {
-								event.getDamager().remove();
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
-					}
-					else {
-						if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-							if(isItemFrame) {
-								event.getDamager().remove();
-							}
-							event.setCancelled(true);
-							player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-							return;
-						}	
-					}	
-				}
-				if(residents != null) {
-					if(residents.contains(player.getUniqueId())) {
-						boolean residentValue = false;
-						if(owner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-							if(residentValue == false) {
-								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-									if(isItemFrame) {
-										event.getDamager().remove();
-									}
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}	
-						}
-						if(owner == null && offOwner != null) {
-							residentValue = Methods.checkIfResidentCan(player, owner, "allowDamageEntities", res);
-							if(residentValue == false) {
-								if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-									if(isItemFrame) {
-										event.getDamager().remove();
-									}
-									event.setCancelled(true);
-									player.sendMessage(Utils.normal("&cYou cannot break entities in this residence!"));
-									return;
-								}
-							}
-							if(residentValue == true) {
-								return;
-							}
-						}
-					}
-					if(res.entityInResidence(entity) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-						if(isItemFrame) {
-							event.getDamager().remove();
-						}
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
-						return;
-					}	
-				}
-				else {
-					if(res.entityInResidence(entity) == true && res.isOwner(player) == false) {
-						if(isItemFrame) {
-							event.getDamager().remove();
-						}
-						event.setCancelled(true);
-						player.sendMessage(Utils.normal("&cYou cannot damage entities in this residence!"));
-						return;
-					}	
-				}
+			if(cancelEvent) {
+				event.setCancelled(true);
 			}
 		}
 	}
 	
 	
 	// Deny breaking minecarts
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onVehicleDestroy(VehicleDestroyEvent event) {
 		Entity attacker = event.getAttacker();
@@ -2267,101 +1523,9 @@ public class ResListeners implements Listener{
 				return;
 			}
 			if(value == false) {
-				if(Main.protectOnlyWhileOffline == true) {
-					List<UUID> residents = res.getResidents();
-					if(vehicle.getType() == EntityType.BOAT || entityBreak.contains(vehicle.getType())) {
-						if(residents != null) {
-							if(residents.contains(player.getUniqueId())) {
-								boolean residentValue = false;
-								if(offOwner != null) {
-									residentValue = Methods.checkIfResidentCan(player, owner, "allowVehicleDestroy", res);
-									if(residentValue == false) {
-										if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false) {
-											event.setCancelled(true);
-											player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-											return;
-										}
-									}
-									if(residentValue == true) {
-										return;
-									}	
-								}
-								if(owner == null && offOwner != null) {
-									residentValue = Methods.checkIfResidentCan(player, offOwner, "allowVehicleDestroy", res);
-									if(residentValue == false) {
-										if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false) {
-											event.setCancelled(true);
-											player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-											return;
-										}
-									}
-									if(residentValue == true) {
-										return;
-									}	
-								}
-							}
-							if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-								return;
-							}	
-						}
-						else {
-							if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-								return;
-							}	
-						}	
-					}
-				}
-				if(Main.protectOnlyWhileOffline == false) {
-					List<UUID> residents = res.getResidents();
-					if(vehicle.getType() == EntityType.BOAT || entityBreak.contains(vehicle.getType())) {
-						if(residents != null) {
-							if(residents.contains(player.getUniqueId())) {
-								boolean residentValue = false;
-								if(owner != null) {
-									residentValue = Methods.checkIfResidentCan(player, owner, "allowVehicleDestroy", res);
-									if(residentValue == false) {
-										if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false) {
-											event.setCancelled(true);
-											player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-											return;
-										}
-									}
-									if(residentValue == true) {
-										return;
-									}	
-								}
-								if(owner == null && offOwner != null) {
-									residentValue = Methods.checkIfResidentCan(player, offOwner, "allowVehicleDestroy", res);
-									if(residentValue == false) {
-										if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false) {
-											event.setCancelled(true);
-											player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-											return;
-										}
-									}
-									if(residentValue == true) {
-										return;
-									}	
-								}
-							}
-							if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false && !residents.contains(player.getUniqueId())) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-								return;
-							}	
-						}
-						else {
-							if(res.entityInResidence(vehicle) == true && res.isOwner(player) == false) {
-								event.setCancelled(true);
-								player.sendMessage(Utils.normal("&cYou cannot destroy vehicles in this residence!"));
-								return;
-							}	
-						}	
-					}
+				boolean cancelEvent = handleEvent(player, vehicle, res, owner, offOwner, "allowVehicleDestroy");
+				if(cancelEvent) {
+					event.setCancelled(true);
 				}
 			}
 		}
@@ -2422,20 +1586,20 @@ public class ResListeners implements Listener{
 				}
 				Main.deletePlayerResidence(player.getUniqueId(), res);
 				Methods.removePermissionsExceptMeta(player);
-				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&aYour residence has been deleted"));
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.ResDeleted")));
 				promptedUser.put(player.getName(), false);
 				return;
 			}
 			if(message.equalsIgnoreCase("no")) {
 				event.setMessage(null);
 				promptedUser.put(player.getName(), false);
-				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&eResidence deletion has been cancelled"));
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.ResDeletionCancelled")));
 				return;
 			}
 			else {
 				event.setCancelled(true);
 				event.setMessage(null);
-				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&cYou must type only &aYes &cor &4No"));
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.TypeYesNo")));
 				return;
 			}
 		}
@@ -2448,7 +1612,7 @@ public class ResListeners implements Listener{
 			if(message.equalsIgnoreCase("done")) {
 				event.setMessage(null);
 				if(Commands.block1.containsKey(player.getUniqueId()) == false || Commands.block2.containsKey(player.getUniqueId()) == false) {
-					player.sendMessage(Utils.normal(Commands.pluginPrefix+"&cYou must select 2 points to set a new area!"));
+					player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.TwoPoints")));
 					return;
 				}
 				Residence playerRes = userInAreaSelectionResidence.get(player.getName());
@@ -2457,13 +1621,13 @@ public class ResListeners implements Listener{
 				Cuboid newArea = new Cuboid(b1Loc, b2Loc);
 				int maxArea = Methods.getPlayerDefaultAreaSize(player);
 				if(newArea.getBlocks().size() >= maxArea) {
-					player.sendMessage(Utils.normal(Commands.pluginPrefix+"&cYour new residence area is too big! Please select a new area"));
+					player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.ResAreaTooBig")));
 					return;
 				}
 				int index = Residence.removeResidenceFromList(player.getUniqueId(), playerRes);
 				playerRes.setArea(newArea);
 				Residence.saveResidenceData(player.getUniqueId(), playerRes, true, index);
-				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&aYour new residence area has been set"));
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.ResAreaSet")));
 				userInAreaSelection.put(player.getName(), false);
 				Commands.block1.remove(player.getUniqueId());
 				Commands.block2.remove(player.getUniqueId());	
@@ -2480,7 +1644,7 @@ public class ResListeners implements Listener{
 			if(message.equalsIgnoreCase("cancel")) {
 				event.setMessage(null);
 				userInAreaSelection.put(player.getName(), false);
-				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&eResidence area creation has been cancelled"));
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.ResAreaCancelled")));
 				Commands.block1.remove(player.getUniqueId());
 				Commands.block2.remove(player.getUniqueId());
 				if(Listeners.task1 != null) {
@@ -2495,7 +1659,7 @@ public class ResListeners implements Listener{
 			}
 			else {
 				event.setMessage(null);
-				player.sendMessage(Utils.normal(Commands.pluginPrefix+"&cYou must type only &aDone &cor &4Cancel"));
+				player.sendMessage(Utils.normal(Commands.pluginPrefix+messages.getConfigField("General.TypeDoneCancel")));
 				return;
 			}
 		}

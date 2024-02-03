@@ -20,5 +20,5 @@ public class MessageUtil {
 		messages.put(player, message);
 		return;
 	}
-	
+
 }

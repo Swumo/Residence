@@ -122,7 +122,6 @@ public class Commands implements TabExecutor{
 		return false;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if(!(sender instanceof Player)) {
@@ -231,10 +230,7 @@ public class Commands implements TabExecutor{
 		}
 		
 //		if(args[0].equalsIgnoreCase("test")) {
-//			String name = args[1];
-//			Residence res = Residence.getResidence(name);
-//			player.sendMessage(String.valueOf(res.getArea().getBlocks().size()));
-//			return true;
+//			
 //		}
 		
 		// Update player permissions if config was updated
@@ -733,7 +729,7 @@ public class Commands implements TabExecutor{
 			List<Residence> toDelete = new ArrayList<>();
 			for(UUID owner : residences.keySet()) {
 				int amount = 0;
-				Player p = Bukkit.getPlayer(owner);
+				OfflinePlayer p = Bukkit.getOfflinePlayer(owner);
 				LinkedList<Residence> res = Residence.getResidences(owner);
 				for(int i = 0; i < res.size(); i++) {
 					Residence r = res.get(i);
@@ -748,11 +744,12 @@ public class Commands implements TabExecutor{
 				}
 				
 				if(p != null && p.isOnline()) {
+					Player pl = p.getPlayer();
 					if(amount == 1) {
-						p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AdminDeletedOne")));
+						pl.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AdminDeletedOne")));
 					}
 					if(amount > 1) {
-						p.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AdminDeletedMore")));
+						pl.sendMessage(Utils.normal(pluginPrefix+messages.getConfigField("Commands.AdminDeletedMore")));
 					}
 				}
 				Methods.removePermissionsExceptMeta(p);	

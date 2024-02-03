@@ -82,22 +82,22 @@ public class ResidenceRuleMenu {
     					break;
     				}
     				if(value == true) {
-						Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, etc.", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
+						Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, placing item frames and armor stands", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
     				}
     				if(value == false) {
-						Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, etc.", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
+						Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, placing item frames and armor stands", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
     				}
     				break;
     			case "allowEntityInteraction":
     				if(isDisabled) {
-    					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+    					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lInteraction", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
     					break;
     				}
     				if(value == true) {
-						Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes placing entities like item frames and armor stands");
+						Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes right clicking/interacting with entities");
     				}
     				if(value == false) {
-						Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes placing entities like item frames and armor stands");
+						Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lInteraction", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes right clicking/interacting with entities");
     				}
     				break;
     			case "allowDamageEntities":
@@ -215,22 +215,22 @@ public class ResidenceRuleMenu {
 					break;
 				}
 				if(value == true) {
-					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, etc.", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
+					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, placing item frames and armor stands", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
 				}
 				if(value == false) {
-					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, etc.", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
+					Utils.createItem(inv, Material.CHEST, 1, 22, "&e&lToggle &a&lBlock &b&lInteraction", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes interacting with chests, furnaces, placing item frames and armor stands", " ", "&7&oAlso includes buttons, trapdoors and pressure plates!");
 				}
 				break;
 			case "allowEntityInteraction":
 				if(isDisabled) {
-					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
+					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lInteraction", "&bCurrently: &4&lDISABLED", " ", "&4&lRule has been disabled");	
 					break;
 				}
 				if(value == true) {
-					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes placing entities like item frames and armor stands");
+					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lInteraction", "&bCurrently: &a&lENABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes right clicking/interacting with entities");
 				}
 				if(value == false) {
-					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lPlacing", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes placing entities like item frames and armor stands");
+					Utils.createItem(inv, Material.ITEM_FRAME, 1, 23, "&e&lToggle &f&lEntity &a&lInteraction", "&bCurrently: &c&lDISABLED", " ", "&7&oClick to toggle", " ", "&7&oIncludes right clicking/interacting with entities");
 				}
 				break;
 			case "allowDamageEntities":
@@ -320,7 +320,7 @@ public class ResidenceRuleMenu {
 			Methods.RuleMenuUpdateRule(player, "allowBlockInteraction", ResidenceMainMenu.selectedResidence.get(player.getUniqueId()));
 			return;
 		}
-		if(clicked.getItemMeta().getDisplayName().contains(Utils.normal("&e&lToggle &f&lEntity &a&lPlacing"))) {
+		if(clicked.getItemMeta().getDisplayName().contains(Utils.normal("&e&lToggle &f&lEntity &a&lInteraction"))) {
 			Methods.RuleMenuUpdateRule(player, "allowEntityInteraction", ResidenceMainMenu.selectedResidence.get(player.getUniqueId()));
 			return;
 		}
